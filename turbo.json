@@ -1,6 +1,22 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "JWT_SECRET",
+    "JWT_EXPIRES_IN",
+    "DEMO_LOGIN_USERNAME",
+    "DEMO_LOGIN_PASSWORD",
+    "DEMO_LOGIN_ORG_ID",
+    "DEMO_LOGIN_FLEET_ID",
+    "DEMO_LOGIN_ROLE",
+    "MAP_SERVICE_URL",
+    "CHAT_SERVICE_URL",
+    "BOARD_SERVICE_URL",
+    "HUB_SERVICE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
