@@ -1,38 +1,6 @@
 name: gamopls-teamcore
 
 services:
-  postgres:
-    image: timescale/timescaledb:latest-pg16
-    container_name: gamopls-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-gamopls_teamcore}
-      POSTGRES_USER: ${POSTGRES_USER:-gamopls}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gamopls} -d ${POSTGRES_DB:-gamopls_teamcore}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  redis:
-    image: redis:7-alpine
-    container_name: gamopls-redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   nats:
     image: nats:2-alpine
     container_name: gamopls-nats
@@ -57,6 +25,4 @@ services:
       - "1883:1883"
 
 volumes:
-  postgres-data:
-  redis-data:
   nats-data:
