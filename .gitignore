@@ -36,7 +36,8 @@ Thumbs.db
 services/core-ingestion/bin/
 
 # Python
-services/ai-engine/__pycache__/
+__pycache__/
+*.pyc
 services/ai-engine/.venv/
 services/ai-engine/*.egg-info/
 services/ai-engine/.pytest_cache/
