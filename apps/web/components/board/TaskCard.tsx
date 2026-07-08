@@ -7,7 +7,7 @@ import type { BadgeTone } from "@gamopls/ui";
 import { TASK_STATUS_FORWARD_FLOW } from "./types";
 import type { Mission, Task, TaskStatus } from "./types";
 import { Input } from "../ui/input";
-import { Bot, UserCheck, CheckCircle2, ShieldAlert } from "lucide-react";
+import { UserCheck, CheckCircle2, ShieldAlert } from "lucide-react";
 
 const STATUS_TONE: Record<TaskStatus, BadgeTone> = {
   draft: "warning",

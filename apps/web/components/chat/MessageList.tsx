@@ -1,6 +1,6 @@
 import { Badge, Spinner } from "@gamopls/ui";
 import type { ChatMessage } from "./types";
-import { MessageSquare, BellRing } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 export interface MessageListProps {
   messages: ChatMessage[];

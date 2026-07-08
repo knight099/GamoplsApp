@@ -8,7 +8,6 @@ import { MessageComposer } from "./MessageComposer";
 import { MessageList } from "./MessageList";
 import { NewChannelForm } from "./NewChannelForm";
 import type { ChatMessage, MissionChannel } from "./types";
-import { MessageSquareDot } from "lucide-react";
 
 export interface ChatViewProps {
   orgId: string;
