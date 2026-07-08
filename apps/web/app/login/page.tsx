@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card } from "@gamopls/ui";
 
 /**
  * V1 placeholder login page — posts to /api/login, which checks a
@@ -39,40 +38,53 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "0 auto" }}>
-      <Card>
-        <h1 style={{ fontSize: "1.25rem" }}>Log in</h1>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-          V1 demo login (placeholder — see <code>DEMO_LOGIN_USERNAME</code>/
-          <code>DEMO_LOGIN_PASSWORD</code> in <code>.env.example</code>).
-        </p>
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}
-        >
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.875rem" }}>
+    <div style={{ maxWidth: 420, margin: "4rem auto 0 auto" }}>
+      <div className="saas-card animate-fade-in" style={{ padding: "2.5rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <span style={{ fontSize: "3rem" }}>⚡</span>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, marginTop: "1rem" }}>Authorized Login</h1>
+          <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+            GAMOPLS TeamCore Operations Control
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 500 }}>
             Username
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              style={{ padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+              placeholder="e.g. demo"
+              required
             />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.875rem" }}>
+
+          <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 500 }}>
             Password
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+              placeholder="e.g. demo"
+              required
             />
           </label>
-          {error && <p style={{ color: "#dc2626", fontSize: "0.875rem" }}>{error}</p>}
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Signing in..." : "Sign in"}
-          </Button>
+
+          {error && (
+            <p style={{ color: "var(--accent-rose)", fontSize: "0.875rem", background: "rgba(244, 63, 94, 0.1)", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid rgba(244, 63, 94, 0.2)" }}>
+              ⚠️ {error}
+            </p>
+          )}
+
+          <button type="submit" className="btn-premium btn-premium-primary" style={{ width: "100%", marginTop: "0.5rem" }} disabled={submitting}>
+            {submitting ? "Authenticating Session..." : "Authorize Access"}
+          </button>
         </form>
-      </Card>
+
+        <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", textAlign: "center", marginTop: "2rem" }}>
+          Note: This is a demo gateway gate. Valid credentials are configured in your env (defaults: demo / demo).
+        </p>
+      </div>
     </div>
   );
 }
