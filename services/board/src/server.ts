@@ -1,17 +1,27 @@
 import { NatsEventBus } from "@gamopls/event-bus-nats";
 import { buildApp } from "./build-app.js";
 import { InMemoryBoardRepository } from "./in-memory-repository.js";
+import { PrismaBoardRepository } from "./prisma-repository.js";
+import { getPrismaClient } from "@gamopls/db";
 import { subscribeTaskSuggested } from "./task-suggested-handler.js";
+import type { BoardRepository } from "./repository.js";
 
 const port = Number(process.env.PORT ?? 4302);
 const host = process.env.HOST ?? "0.0.0.0";
 const registryUrl = process.env.REGISTRY_URL ?? "http://localhost:4400";
 const natsServers = process.env.NATS_URL ?? "nats://localhost:4222";
+const databaseUrl = process.env.DATABASE_URL;
 
-// V1 default: in-memory repository. Swap for `PostgresBoardRepository`
-// (see postgres-repository.ts) by wiring a `pg` Pool here once a live
-// Postgres is available in the target environment.
-const repo = new InMemoryBoardRepository();
+let repo: BoardRepository;
+
+if (databaseUrl) {
+  console.log("board: using Neon Postgres database via Prisma");
+  const prisma = getPrismaClient();
+  repo = new PrismaBoardRepository(prisma);
+} else {
+  console.warn("board: DATABASE_URL not set — board is running with an in-memory (non-persistent) store.");
+  repo = new InMemoryBoardRepository();
+}
 
 const app = buildApp({ repo, registryUrl });
 

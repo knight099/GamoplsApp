@@ -1,0 +1,168 @@
+// ============================================================================
+// GAMOPLS TeamCore — Unified Prisma Schema
+//
+// Single schema covering all service tables against one Neon Postgres
+// database for V1. Each service imports the generated PrismaClient from
+// @gamopls/db. If services get their own databases later, this schema can
+// be split into per-service schemas.
+//
+// Tables below match the existing SQL DDLs that were hand-applied in V1:
+//   - services/board/src/schema.sql  → Mission, Task
+//   - services/chat/db/schema.sql    → MissionChannel, ChatMessage
+//   - services/hub (in-memory V1)    → Document (new table)
+//   - services/registry (in-memory)  → PluginRegistration (new table)
+//   - plugins/asset-vehicle/sql/     → VehicleDetails
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// services/board — Missions & Tasks (asset-type-agnostic per CLAUDE.md)
+// ---------------------------------------------------------------------------
+
+model Mission {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id      String
+  fleet_id    String
+  title       String
+  description String   @default("")
+  status      String   // 'active' | 'completed' | 'archived'
+  created_at  DateTime @default(now()) @db.Timestamptz()
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  tasks Task[]
+
+  @@index([org_id, fleet_id])
+  @@map("missions")
+}
+
+model Task {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id      String
+  fleet_id    String
+  mission_id  String?  @db.Uuid
+  title       String
+  description String   @default("")
+  status      String   // 'draft' | 'open' | 'in_progress' | 'done' | 'cancelled'
+  asset_id    String?  // Opaque reference to any Taskable asset
+  created_at  DateTime @default(now()) @db.Timestamptz()
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  mission Mission? @relation(fields: [mission_id], references: [id], onDelete: SetNull)
+
+  @@index([org_id, fleet_id])
+  @@index([mission_id])
+  @@index([asset_id])
+  @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// services/chat — Mission Channels & Messages
+// ---------------------------------------------------------------------------
+
+model MissionChannel {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id     String
+  fleet_id   String
+  mission_id String   // Opaque reference to a Mission in services/board
+  name       String
+  created_at DateTime @default(now()) @db.Timestamptz()
+
+  messages ChatMessage[]
+
+  @@index([org_id, mission_id])
+  @@index([org_id, fleet_id])
+  @@map("mission_channels")
+}
+
+model ChatMessage {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  channel_id      String   @db.Uuid
+  org_id          String
+  fleet_id        String
+  sender_type     String   // 'user' | 'system'
+  sender_id       String
+  body            String
+  asset_id        String?
+  media_url       String?
+  media_filename  String?
+  media_mime_type String?
+  media_size      BigInt?
+  created_at      DateTime @default(now()) @db.Timestamptz()
+
+  channel MissionChannel @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+
+  @@index([channel_id, created_at])
+  @@map("chat_messages")
+}
+
+// ---------------------------------------------------------------------------
+// services/hub — Documents
+// ---------------------------------------------------------------------------
+
+model Document {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id           String
+  fleet_id         String
+  filename         String
+  mime_type        String
+  size             Int      @default(0)
+  uploader         String
+  description      String?
+  tags             String[] @default([])
+  storage_location String
+  created_at       DateTime @default(now()) @db.Timestamptz()
+
+  @@index([org_id, fleet_id])
+  @@map("documents")
+}
+
+// ---------------------------------------------------------------------------
+// services/registry — Plugin registrations
+// ---------------------------------------------------------------------------
+
+model PluginRegistration {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type          String
+  endpoint      String
+  capabilities  String[] @default([])
+  registered_at DateTime @default(now()) @db.Timestamptz()
+
+  @@unique([type, endpoint])
+  @@map("plugin_registrations")
+}
+
+// ---------------------------------------------------------------------------
+// plugins/asset-vehicle — VehicleDetails (owned by the plugin, not board)
+// ---------------------------------------------------------------------------
+
+model VehicleDetails {
+  asset_id             String   @id @db.Uuid
+  plate_number         String
+  vehicle_type         String   // 'truck' | 'van' | 'car' | 'bike' | 'bus' | 'other'
+  make                 String?
+  model                String?
+  fuel_type            String   // 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'cng'
+  fuel_capacity_liters Decimal? @db.Decimal
+  odometer_km          Decimal  @default(0) @db.Decimal
+
+  trip_started_at       DateTime? @db.Timestamptz()
+  trip_ended_at         DateTime? @db.Timestamptz()
+  trip_origin_label     String?
+  trip_destination_label String?
+  trip_distance_km      Decimal?  @db.Decimal
+
+  created_at DateTime @default(now()) @db.Timestamptz()
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  @@index([plate_number])
+  @@map("vehicle_details")
+}

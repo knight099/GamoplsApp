@@ -1,9 +1,13 @@
-import { Redis } from "ioredis";
+import { Redis as IoRedis } from "ioredis";
+import { Redis as UpstashRedis } from "@upstash/redis";
 import { NatsEventBus } from "@gamopls/event-bus-nats";
 import { ASSET_LOCATION_UPDATED, assetLocationUpdatedSchema } from "@gamopls/event-schemas";
 import { buildApp } from "./build-app.js";
 import { RedisPositionCache } from "./cache/redis-position-cache.js";
+import { UpstashPositionCache } from "./cache/upstash-position-cache.js";
+import { InMemoryPositionCache } from "./cache/in-memory-position-cache.js";
 import { MapService } from "./map-service.js";
+import type { PositionCache } from "./cache/position-cache.js";
 
 /**
  * Composition root: this is the only place the concrete NATS/Redis
@@ -12,8 +16,27 @@ import { MapService } from "./map-service.js";
  * `EventSubscriber`/`PositionCache` interfaces.
  */
 async function main() {
-  const redis = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379");
-  const cache = new RedisPositionCache(redis);
+  let cache: PositionCache;
+
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const redisUrl = process.env.REDIS_URL;
+
+  if (upstashUrl && upstashToken) {
+    console.log("map: using cloud-hosted Upstash Redis via REST");
+    const upstashRedis = new UpstashRedis({
+      url: upstashUrl,
+      token: upstashToken,
+    });
+    cache = new UpstashPositionCache(upstashRedis);
+  } else if (redisUrl) {
+    console.log(`map: using classic TCP Redis at ${redisUrl}`);
+    const redis = new IoRedis(redisUrl);
+    cache = new RedisPositionCache(redis);
+  } else {
+    console.warn("map: neither UPSTASH_REDIS_REST_URL nor REDIS_URL configured. Falling back to in-memory position cache.");
+    cache = new InMemoryPositionCache();
+  }
 
   const eventBus = new NatsEventBus({ servers: process.env.NATS_URL ?? "nats://localhost:4222" });
   await eventBus.connect();

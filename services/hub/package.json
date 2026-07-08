@@ -24,6 +24,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@gamopls/db": "workspace:*",
     "fastify": "^5.1.0",
     "zod": "^3.23.8"
   },

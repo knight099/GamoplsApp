@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@gamopls/asset-contracts": "workspace:*",
+    "@gamopls/db": "workspace:*",
     "@gamopls/event-bus-nats": "workspace:*",
     "@gamopls/event-schemas": "workspace:*",
     "fastify": "^5.1.0",
