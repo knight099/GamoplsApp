@@ -49,6 +49,13 @@ services:
       timeout: 5s
       retries: 10
 
+  mqtt:
+    image: eclipse-mosquitto:1.6
+    container_name: gamopls-mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+
 volumes:
   postgres-data:
   redis-data:

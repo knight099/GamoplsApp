@@ -12,6 +12,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "dev": "turbo run dev",
+    "start:all": "node scripts/start-all.mjs",
     "check:architecture": "node scripts/check-architecture-rules.mjs",
     "test:check-architecture": "vitest run scripts/__tests__/check-architecture-rules.test.mjs"
   },

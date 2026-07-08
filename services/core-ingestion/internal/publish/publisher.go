@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	SubjectAssetLocationUpdated = "events.AssetLocationUpdated"
-	SubjectAssetHealthChanged   = "events.AssetHealthChanged"
+	SubjectAssetLocationUpdated = "AssetLocationUpdated"
+	SubjectAssetHealthChanged   = "AssetHealthChanged"
 )
 
 // Publisher publishes normalized events to NATS subjects.

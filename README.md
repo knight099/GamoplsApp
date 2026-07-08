@@ -12,17 +12,14 @@ A multi-tenant fleet management platform that starts vehicle-first on GAMOPLS's 
 # Install JS/TS dependencies
 pnpm install
 
-# Start local infrastructure (Postgres/TimescaleDB, Redis, NATS)
-docker-compose -f infra/docker-compose.yml up -d
-
 # Build everything
 pnpm build
 
 # Run all tests
 pnpm test
 
-# Start all services + web app in dev mode
-pnpm dev
+# Start the entire local platform (Docker infra, TS services, Go Ingestion, Python AI, and Simulator)
+pnpm start:all
 ```
 
 ## Architecture

@@ -37,11 +37,14 @@ Package manager: pnpm with workspaces, task runner: Turborepo, for everything un
 ## Commands
 
 ```bash
+# Start the entire local platform (Docker NATS/MQTT, TS services, Go Ingestion, Python AI, and Simulator)
+pnpm start:all
+
 # Install & local infra
 pnpm install
 docker-compose -f infra/docker-compose.yml up -d   # Postgres/TimescaleDB, Redis, NATS
 
-# Run everything in dev mode (turbo runs all workspace `dev` scripts in parallel)
+# Run TS workspace services in dev mode (turbo runs all workspace `dev` scripts in parallel)
 pnpm dev
 
 # Run a single app/service
