@@ -47,6 +47,7 @@ const LOG_PREFIXES = {
 };
 
 const activeProcesses = [];
+let startedWithDocker = false;
 
 /**
  * Loads and parses root .env file.
@@ -171,11 +172,13 @@ function shutdown() {
   }
 
   // Docker compose down
-  try {
-    console.log("Bringing down docker services...");
-    execSync("docker-compose -f infra/docker-compose.yml down", { stdio: "inherit" });
-  } catch (err) {
-    console.error("Failed to bring down docker services:", err.message);
+  if (startedWithDocker) {
+    try {
+      console.log("Bringing down docker services...");
+      execSync("docker-compose -f infra/docker-compose.yml down", { stdio: "inherit" });
+    } catch (err) {
+      console.error("Failed to bring down docker services:", err.message);
+    }
   }
 
   console.log(`${COLORS.green}Cleanup complete. Goodbye!${COLORS.reset}`);
@@ -193,11 +196,23 @@ async function main() {
 
   // 1. Docker compose up
   try {
-    console.log(`${LOG_PREFIXES.docker} Starting Postgres, Redis, NATS, and MQTT services...`);
-    execSync("docker-compose -f infra/docker-compose.yml up -d", { stdio: "inherit", cwd: rootDir });
-  } catch (err) {
-    console.error(`${LOG_PREFIXES.docker} Failed to start docker services:`, err.message);
-    process.exit(1);
+    execSync("docker info", { stdio: "ignore" });
+    startedWithDocker = true;
+  } catch {
+    // Docker daemon not running
+  }
+
+  if (startedWithDocker) {
+    try {
+      console.log(`${LOG_PREFIXES.docker} Starting Postgres, Redis, NATS, and MQTT services...`);
+      execSync("docker-compose -f infra/docker-compose.yml up -d", { stdio: "inherit", cwd: rootDir });
+    } catch (err) {
+      console.error(`${LOG_PREFIXES.docker} Failed to start docker services:`, err.message);
+      process.exit(1);
+    }
+  } else {
+    console.log(`${LOG_PREFIXES.docker} ${COLORS.yellow}Warning: Docker daemon is not running. Skipping local container startup (NATS & MQTT).${COLORS.reset}`);
+    console.log(`${LOG_PREFIXES.docker} ${COLORS.dim}Make sure NATS and MQTT are running natively, or configure remote ones in your .env.${COLORS.reset}`);
   }
 
   // 2. Wait for NATS (4222) and MQTT (1883)
