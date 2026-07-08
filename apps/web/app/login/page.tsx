@@ -2,12 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Zap, ShieldAlert } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
-/**
- * V1 placeholder login page — posts to /api/login, which checks a
- * hardcoded/env-configured demo credential (see lib/demo-login.ts) and sets
- * an httpOnly session cookie. Not a real identity/user-management UI.
- */
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -38,53 +36,74 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: "4rem auto 0 auto" }}>
-      <div className="saas-card animate-fade-in" style={{ padding: "2.5rem" }}>
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <span style={{ fontSize: "3rem" }}>⚡</span>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, marginTop: "1rem" }}>Authorized Login</h1>
-          <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
-            GAMOPLS TeamCore Operations Control
-          </p>
-        </div>
+    <div className="max-w-md mx-auto mt-20 px-4">
+      <Card className="border border-border bg-card shadow-2xl backdrop-blur-sm">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="flex justify-center">
+            <div className="p-3 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <Zap className="h-8 w-8 fill-cyan-400/10 animate-pulse" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-white tracking-tight">
+            Authorized Control Login
+          </CardTitle>
+          <CardDescription className="text-sm font-medium text-muted-foreground">
+            GAMOPLS TeamCore Operations Portal
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Username
+              </label>
+              <Input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter dispatcher username"
+                required
+                className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-cyan-500/50"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 500 }}>
-            Username
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. demo"
-              required
-            />
-          </label>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Password
+              </label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-cyan-500/50"
+              />
+            </div>
 
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 500 }}>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="e.g. demo"
-              required
-            />
-          </label>
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs font-medium text-rose-400">
+                <ShieldAlert className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
-          {error && (
-            <p style={{ color: "var(--accent-rose)", fontSize: "0.875rem", background: "rgba(244, 63, 94, 0.1)", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid rgba(244, 63, 94, 0.2)" }}>
-              ⚠️ {error}
+            <button 
+              type="submit" 
+              className="w-full flex items-center justify-center h-10 px-4 rounded-lg bg-cyan-500 text-white font-semibold text-sm hover:bg-cyan-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+              disabled={submitting}
+            >
+              {submitting ? "Authenticating Session..." : "Authorize Access"}
+            </button>
+          </form>
+
+          <div className="border-t border-border pt-6 text-center">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+              Demo Credentials: demo / demo
             </p>
-          )}
-
-          <button type="submit" className="btn-premium btn-premium-primary" style={{ width: "100%", marginTop: "0.5rem" }} disabled={submitting}>
-            {submitting ? "Authenticating Session..." : "Authorize Access"}
-          </button>
-        </form>
-
-        <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", textAlign: "center", marginTop: "2rem" }}>
-          Note: This is a demo gateway gate. Valid credentials are configured in your env (defaults: demo / demo).
-        </p>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

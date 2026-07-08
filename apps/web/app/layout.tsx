@@ -2,6 +2,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 import "./globals.css";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+import { Globe, MessageSquare, ClipboardList, Files, Zap, LogOut } from "lucide-react";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata = {
   title: "GAMOPLS TeamCore",
@@ -9,78 +14,87 @@ export const metadata = {
 };
 
 const NAV_LINKS = [
-  { href: "/map", label: "Map", icon: "🌐" },
-  { href: "/chat", label: "Chat", icon: "💬" },
-  { href: "/board", label: "Board", icon: "📋" },
-  { href: "/hub", label: "Hub", icon: "📂" },
+  { href: "/map", label: "Map", icon: Globe },
+  { href: "/chat", label: "Chat", icon: MessageSquare },
+  { href: "/board", label: "Board", icon: ClipboardList },
+  { href: "/hub", label: "Hub", icon: Files },
 ];
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
 
   return (
-    <html lang="en">
-      <body>
-        <div className="app-container">
+    <html lang="en" className={cn("font-sans dark", geist.variable)}>
+      <body className="bg-background text-foreground antialiased min-h-screen">
+        <div className="flex min-h-screen">
           {/* High Fidelity Sidebar */}
-          <aside className="sidebar">
-            <Link href="/" className="sidebar-logo">
-              <span style={{ fontSize: "1.5rem" }}>⚡</span> GAMOPLS
-            </Link>
+          <aside className="w-64 fixed inset-y-0 left-0 bg-card border-r border-border flex flex-col z-50">
+            <div className="h-16 px-6 border-b border-border flex items-center gap-2">
+              <Zap className="h-6 w-6 text-cyan-400 fill-cyan-400/20" />
+              <Link href="/" className="font-bold text-lg tracking-tight text-foreground hover:opacity-90">
+                GAMOPLS <span className="text-cyan-400">TeamCore</span>
+              </Link>
+            </div>
             
-            <nav className="sidebar-nav">
-              {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="sidebar-link">
-                  <span style={{ fontSize: "1.1rem" }}>{link.icon}</span>
-                  {link.label}
-                </Link>
-              ))}
+            <nav className="flex-1 py-6 px-4 flex flex-col gap-1">
+              {NAV_LINKS.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link key={link.href} href={link.href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200">
+                    <Icon className="h-4 w-4" />
+                    {link.label}
+                  </Link>
+                );
+              })}
             </nav>
 
-            <div style={{ marginTop: "auto", borderTop: "1px solid var(--border-color)", paddingTop: "1.5rem" }}>
+            <div className="p-4 border-t border-border mt-auto bg-muted/30">
               {session ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--accent-emerald)" }} />
-                    <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>Active Session</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Dispatcher Active</span>
                   </div>
-                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", wordBreak: "break-all" }}>
+                  <span className="text-xs font-medium text-foreground truncate max-w-full">
                     {session.user_id}
                   </span>
-                  <a href="/api/logout" style={{ fontSize: "0.75rem", color: "var(--accent-rose)", textDecoration: "none", marginTop: "0.5rem" }}>
-                    Sign Out →
+                  <a href="/api/logout" className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-400 hover:text-rose-300 transition-colors mt-2">
+                    <LogOut className="h-3 w-3" />
+                    Sign Out
                   </a>
                 </div>
               ) : (
-                <Link href="/login" className="btn-premium btn-premium-primary" style={{ width: "100%", textDecoration: "none" }}>
+                <Link href="/login" className="flex items-center justify-center w-full px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
                   Log In
                 </Link>
               )}
             </div>
           </aside>
 
-          {/* Sticky Dashboard Header */}
-          <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            <header className="dashboard-header">
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <h2 style={{ fontSize: "1.25rem", fontWeight: 600 }}>Control Room</h2>
+          {/* Main Dashboard Layout Container */}
+          <div className="flex-1 pl-64 flex flex-col">
+            {/* Dashboard Sticky Header */}
+            <header className="sticky top-0 h-16 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 z-40">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Fleet Control Center</h2>
                 {session && (
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <span className="neon-badge neon-badge-primary">org: {session.org_id}</span>
-                    <span className="neon-badge neon-badge-cyan">fleet: {session.fleet_id}</span>
+                  <div className="flex gap-2">
+                    <span className="inline-flex items-center rounded-full bg-blue-400/10 px-2.5 py-0.5 text-xs font-medium text-blue-400 border border-blue-400/20">org: {session.org_id}</span>
+                    <span className="inline-flex items-center rounded-full bg-cyan-400/10 px-2.5 py-0.5 text-xs font-medium text-cyan-400 border border-cyan-400/20">fleet: {session.fleet_id}</span>
                   </div>
                 )}
               </div>
-              <div>
-                <span style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>
-                  GAMOPLS TeamCore MVP v1.0
-                </span>
+              <div className="text-xs text-muted-foreground font-medium">
+                GAMOPLS TeamCore MVP v1.0
               </div>
             </header>
 
-            {/* Main Content Area */}
-            <main className="main-content">
-              <div className="animate-fade-in">
+            {/* Main Page Content */}
+            <main className="flex-grow p-8 bg-background">
+              <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {children}
               </div>
             </main>

@@ -1,20 +1,20 @@
 "use client";
 
-// See BoardView.tsx for why React is imported explicitly here (classic JSX
-// transform under vitest, per apps/web's Next-oriented tsconfig).
 import React, { useState } from "react";
 import type { FormEvent } from "react";
 import { Badge, Button, Card } from "@gamopls/ui";
 import type { BadgeTone } from "@gamopls/ui";
 import { TASK_STATUS_FORWARD_FLOW } from "./types";
 import type { Mission, Task, TaskStatus } from "./types";
+import { Input } from "../ui/input";
+import { Bot, UserCheck, CheckCircle2, ShieldAlert } from "lucide-react";
 
 const STATUS_TONE: Record<TaskStatus, BadgeTone> = {
   draft: "warning",
   open: "info",
   in_progress: "info",
   done: "success",
-  cancelled: "danger",
+  cancelled: "neutral",
 };
 
 function nextForwardStatus(status: TaskStatus): TaskStatus | null {
@@ -31,12 +31,6 @@ export interface TaskCardProps {
   onAssign: (taskId: string, assetId: string | null) => Promise<void>;
 }
 
-/**
- * Renders a single Task exactly as returned by services/board — title,
- * description, status, mission_id, asset_id. No vehicle-specific fields:
- * per CLAUDE.md a Task only ever references an asset via the opaque
- * `asset_id` string, so that's all this card shows.
- */
 export function TaskCard({ task, mission, onAdvanceStatus, onSetStatus, onAssign }: TaskCardProps) {
   const [assetInput, setAssetInput] = useState(task.asset_id ?? "");
   const [busy, setBusy] = useState(false);
@@ -63,74 +57,89 @@ export function TaskCard({ task, mission, onAdvanceStatus, onSetStatus, onAssign
   }
 
   return (
-    <Card>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+    <Card className="border border-border bg-card/60 p-5 hover:bg-card hover:border-muted-foreground/20 transition-all duration-200">
+      <div className="flex justify-between items-start gap-4">
         <div>
-          <h4 style={{ margin: 0 }}>{task.title}</h4>
+          <h4 className="font-bold text-white text-base leading-snug">{task.title}</h4>
           {task.description && (
-            <p style={{ margin: "0.25rem 0 0", color: "#6b7280", fontSize: "0.875rem" }}>{task.description}</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{task.description}</p>
           )}
         </div>
-        <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
-          {isDraft && <Badge tone="warning">AI Suggested</Badge>}
-          <Badge tone={STATUS_TONE[task.status]}>{task.status}</Badge>
+        <div className="flex gap-2 shrink-0">
+          {isDraft && (
+            <Badge tone="warning" style={{ fontSize: "10px" }}>
+              AI Suggested
+            </Badge>
+          )}
+          <Badge tone={STATUS_TONE[task.status]} style={{ fontSize: "10px" }}>
+            {task.status.replace("_", " ")}
+          </Badge>
         </div>
       </div>
 
-      <dl
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto 1fr",
-          gap: "0.125rem 0.5rem",
-          fontSize: "0.8125rem",
-          color: "#4b5563",
-          margin: "0.75rem 0",
-        }}
-      >
-        <dt>Mission</dt>
-        <dd style={{ margin: 0 }}>{mission ? mission.title : task.mission_id ?? "— unassigned —"}</dd>
-        <dt>Assigned asset</dt>
-        <dd style={{ margin: 0 }}>{task.asset_id ?? "— unassigned —"}</dd>
-      </dl>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
-        {next && (
-          <Button
-            variant="secondary"
-            disabled={busy}
-            onClick={() => run(() => onAdvanceStatus(task.id, next))}
-          >
-            Mark as {next.replace("_", " ")}
-          </Button>
-        )}
-        {task.status !== "cancelled" && task.status !== "done" && (
-          <Button variant="ghost" disabled={busy} onClick={() => run(() => onSetStatus(task.id, "cancelled"))}>
-            Cancel
-          </Button>
-        )}
+      <div className="grid grid-cols-2 gap-4 border-t border-b border-border/40 py-3 my-3 text-xs">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">Mission scope</span>
+          <span className="text-white font-medium">{mission ? mission.title : task.mission_id ?? "— unassigned —"}</span>
+        </div>
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">Assigned machine</span>
+          <span className="text-white font-mono">{task.asset_id ?? "— unassigned —"}</span>
+        </div>
       </div>
 
-      <form
-        onSubmit={handleAssignSubmit}
-        style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem", alignItems: "center" }}
-      >
-        <label style={{ fontSize: "0.8125rem", color: "#4b5563" }} htmlFor={`assign-${task.id}`}>
-          Reassign to asset id
-        </label>
-        <input
-          id={`assign-${task.id}`}
-          aria-label={`Asset id for ${task.title}`}
-          value={assetInput}
-          onChange={(e) => setAssetInput(e.target.value)}
-          placeholder="asset-123"
-          style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.8125rem" }}
-        />
-        <Button type="submit" variant="secondary" disabled={busy}>
-          Assign
-        </Button>
-      </form>
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-4 pt-1">
+        <div className="flex flex-wrap gap-2 items-center">
+          {next && (
+            <Button
+              variant="secondary"
+              disabled={busy}
+              onClick={() => run(() => onAdvanceStatus(task.id, next))}
+              style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem" }}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+              Mark as {next.replace("_", " ")}
+            </Button>
+          )}
+          {task.status !== "cancelled" && task.status !== "done" && (
+            <Button 
+              variant="ghost" 
+              disabled={busy} 
+              onClick={() => run(() => onSetStatus(task.id, "cancelled"))}
+              style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem" }}
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
 
-      {error && <p style={{ color: "#991b1b", fontSize: "0.8125rem", marginTop: "0.5rem" }}>{error}</p>}
+        <form onSubmit={handleAssignSubmit} className="flex items-center gap-2">
+          <Input
+            id={`assign-${task.id}`}
+            aria-label={`Asset id for ${task.title}`}
+            value={assetInput}
+            onChange={(e) => setAssetInput(e.target.value)}
+            placeholder="asset-id"
+            className="h-8 text-xs bg-background/50 border-border w-28"
+          />
+          <Button 
+            type="submit" 
+            variant="secondary" 
+            disabled={busy}
+            style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem" }}
+          >
+            <UserCheck className="h-3.5 w-3.5 mr-1" />
+            Assign
+          </Button>
+        </form>
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg mt-3">
+          <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
     </Card>
   );
 }

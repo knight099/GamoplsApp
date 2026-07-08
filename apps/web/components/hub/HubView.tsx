@@ -7,6 +7,7 @@ import { DocumentTable } from "./DocumentTable";
 import { SearchPanel } from "./SearchPanel";
 import { UploadForm } from "./UploadForm";
 import type { HubDocument } from "./types";
+import { AlertCircle, RefreshCw, Folder } from "lucide-react";
 
 export interface HubViewProps {
   uploaderId: string;
@@ -14,12 +15,6 @@ export interface HubViewProps {
 
 type LoadState = "loading" | "error" | "ready";
 
-/**
- * HUB view client shell (PLAN.md 6.7): document list, upload form, and
- * keyword search, all against `/api/hub/...` per the gateway contract in
- * apps/web/lib/gateway-proxy.ts — this component tree never fetches
- * services/hub directly.
- */
 export function HubView({ uploaderId }: HubViewProps) {
   const [documents, setDocuments] = useState<HubDocument[]>([]);
   const [state, setState] = useState<LoadState>("loading");
@@ -42,28 +37,62 @@ export function HubView({ uploaderId }: HubViewProps) {
     void loadDocuments();
   }, [loadDocuments]);
 
+  if (state === "loading" && documents.length === 0) {
+    return (
+      <div className="flex justify-center items-center py-24">
+        <Spinner size={32} label="Loading documents" />
+      </div>
+    );
+  }
+
+  if (state === "error" && documents.length === 0) {
+    return (
+      <Card className="border border-border bg-card p-6 text-center max-w-lg mx-auto mt-12 space-y-4">
+        <div className="flex justify-center">
+          <AlertCircle className="h-12 w-12 text-rose-400" />
+        </div>
+        <h2 className="text-xl font-bold text-white">Hub Index Failure</h2>
+        <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">{error}</p>
+        <button 
+          onClick={() => void loadDocuments()} 
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 cursor-pointer"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Retry Sync
+        </button>
+      </Card>
+    );
+  }
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      <h1 style={{ margin: 0 }}>Hub</h1>
-
-      <UploadForm
-        uploaderId={uploaderId}
-        onUploaded={(created) => setDocuments((prev) => [created, ...prev])}
-      />
-
-      <SearchPanel />
-
-      <Card>
-        <h2 style={{ marginTop: 0 }}>Documents</h2>
-        {state === "loading" && documents.length === 0 ? (
-          <Spinner label="Loading documents" />
-        ) : state === "error" && documents.length === 0 ? (
-          <p role="alert" style={{ color: "#991b1b" }}>
-            {error}
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-border/50 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            Hub
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Store, catalog, and query fleet technical files and checklists.
           </p>
-        ) : (
-          <DocumentTable documents={documents} />
-        )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UploadForm
+          uploaderId={uploaderId}
+          onUploaded={(created) => setDocuments((prev) => [created, ...prev])}
+        />
+        <SearchPanel />
+      </div>
+
+      <Card className="border border-border bg-card p-6">
+        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2 flex items-center gap-2">
+          <Folder className="h-5 w-5 text-cyan-400" />
+          Documents
+        </h2>
+        
+        <DocumentTable documents={documents} />
       </Card>
     </div>
   );

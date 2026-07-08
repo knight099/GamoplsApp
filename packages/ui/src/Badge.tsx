@@ -8,24 +8,46 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const TONE_STYLES: Record<BadgeTone, React.CSSProperties> = {
-  neutral: { background: "#f3f4f6", color: "#374151" },
-  success: { background: "#dcfce7", color: "#166534" },
-  warning: { background: "#fef3c7", color: "#92400e" },
-  danger: { background: "#fee2e2", color: "#991b1b" },
-  info: { background: "#dbeafe", color: "#1e40af" },
+  neutral: { 
+    background: "rgba(255, 255, 255, 0.05)", 
+    color: "var(--muted-foreground, #9ca3af)", 
+    borderColor: "var(--border, rgba(255,255,255,0.08))" 
+  },
+  success: { 
+    background: "rgba(16, 185, 129, 0.15)", 
+    color: "#34d399", 
+    borderColor: "rgba(16, 185, 129, 0.3)" 
+  },
+  warning: { 
+    background: "rgba(245, 158, 11, 0.15)", 
+    color: "#fbbf24", 
+    borderColor: "rgba(245, 158, 11, 0.3)" 
+  },
+  danger: { 
+    background: "rgba(239, 68, 68, 0.15)", 
+    color: "#fca5a5", 
+    borderColor: "rgba(239, 68, 68, 0.3)" 
+  },
+  info: { 
+    background: "rgba(59, 130, 246, 0.15)", 
+    color: "#60a5fa", 
+    borderColor: "rgba(59, 130, 246, 0.3)" 
+  },
 };
 
-/** Minimal shared status badge primitive, e.g. asset health / alert state. */
+/** Minimal shared status badge primitive. Inherits variables for sharp SaaS style. */
 export function Badge({ tone = "neutral", style, children, ...rest }: BadgeProps) {
   return (
     <span
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "0.125rem 0.5rem",
+        padding: "0.2rem 0.6rem",
         borderRadius: "9999px",
         fontSize: "0.75rem",
         fontWeight: 600,
+        border: "1px solid",
+        letterSpacing: "0.02em",
         ...TONE_STYLES[tone],
         ...style,
       }}

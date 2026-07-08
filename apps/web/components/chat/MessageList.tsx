@@ -1,5 +1,6 @@
 import { Badge, Spinner } from "@gamopls/ui";
 import type { ChatMessage } from "./types";
+import { MessageSquare, BellRing } from "lucide-react";
 
 export interface MessageListProps {
   messages: ChatMessage[];
@@ -9,27 +10,21 @@ export interface MessageListProps {
 
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
+  return Number.isNaN(date.getTime()) ? iso : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-/**
- * Renders a channel's messages. System messages (senderType "system" —
- * auto-posted from AlertRaised events by services/chat's AlertBridge) are
- * visually distinguished with a Badge so operators can tell an automated
- * alert notice apart from a teammate's message at a glance.
- */
 export function MessageList({ messages, loading, error }: MessageListProps) {
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "1rem" }}>
-        <Spinner size={14} /> <span style={{ fontSize: "0.875rem", color: "#6b7280" }}>Loading messages…</span>
+      <div className="flex items-center gap-2 py-8 justify-center text-xs text-muted-foreground">
+        <Spinner size={14} /> <span>Loading messages…</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <p role="alert" style={{ color: "#dc2626", fontSize: "0.875rem", padding: "1rem" }}>
+      <p role="alert" className="text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 p-4 rounded-lg">
         {error}
       </p>
     );
@@ -37,34 +32,60 @@ export function MessageList({ messages, loading, error }: MessageListProps) {
 
   if (messages.length === 0) {
     return (
-      <p style={{ color: "#6b7280", fontSize: "0.875rem", padding: "1rem" }}>
-        No messages yet — say something below.
-      </p>
+      <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground space-y-2">
+        <MessageSquare className="h-8 w-8 text-muted-foreground/30" />
+        <p className="text-xs font-medium">No messages yet — say something below.</p>
+      </div>
     );
   }
 
   return (
-    <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-      {messages.map((message) => (
-        <li key={message.id} data-testid="chat-message" data-sender-type={message.senderType}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <strong style={{ fontSize: "0.875rem" }}>{message.senderId}</strong>
-            {message.senderType === "system" && <Badge tone="info">System alert</Badge>}
-            <span style={{ fontSize: "0.75rem", color: "#9ca3af" }}>{formatTimestamp(message.createdAt)}</span>
-          </div>
-          <p style={{ margin: "0.125rem 0 0", fontSize: "0.875rem" }}>{message.body}</p>
-          {message.media && (
-            <a
-              href={message.media.url}
-              target="_blank"
-              rel="noreferrer"
-              style={{ fontSize: "0.8125rem", color: "#2563eb" }}
-            >
-              📎 {message.media.filename} ({message.media.mimeType}, {message.media.size} bytes)
-            </a>
-          )}
-        </li>
-      ))}
+    <ul className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+      {messages.map((message) => {
+        const isSystem = message.senderType === "system";
+        return (
+          <li 
+            key={message.id} 
+            data-testid="chat-message" 
+            data-sender-type={message.senderType}
+            className={`p-3 rounded-lg border text-sm transition-colors ${
+              isSystem 
+                ? "bg-rose-500/5 border-rose-500/20 text-rose-300" 
+                : "bg-muted/30 border-border text-foreground"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <span className={`font-semibold text-xs ${isSystem ? "text-rose-400" : "text-white"}`}>
+                  {message.senderId}
+                </span>
+                {isSystem && (
+                  <Badge tone="info">System alert</Badge>
+                )}
+              </div>
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {formatTimestamp(message.createdAt)}
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed break-words">{message.body}</p>
+            {message.media && (
+              <div className="mt-2 pt-2 border-t border-border/30">
+                <a
+                  href={message.media.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  📎 {message.media.filename} 
+                  <span className="text-[10px] text-muted-foreground/80 font-normal">
+                    ({message.media.mimeType}, {message.media.size} bytes)
+                  </span>
+                </a>
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }

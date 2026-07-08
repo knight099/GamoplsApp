@@ -6,6 +6,7 @@ import { fetchFleetPositions, listGeofences, MapApiError } from "./api";
 import { AssetPositionsTable } from "./AssetPositionsTable";
 import { GeofencePanel } from "./GeofencePanel";
 import type { AssetMarker, Geofence } from "./types";
+import { RefreshCw } from "lucide-react";
 
 export interface MapViewProps {
   fleetId: string;
@@ -13,21 +14,6 @@ export interface MapViewProps {
   pollIntervalMs?: number;
 }
 
-/**
- * MAP view client shell. Polls `GET /api/map/fleets/:fleetId/positions`
- * on an interval rather than opening a WebSocket.
- *
- * Tradeoff note: `services/map` does expose a WS endpoint
- * (`/ws/fleets/:fleetId/positions`), but proxying a WebSocket through a
- * Next.js Route Handler (the BFF gateway pattern this app uses for every
- * other request, see apps/web/lib/gateway-proxy.ts) isn't a fit for the
- * serverless-style request/response handler model — the route handler
- * doesn't hold a long-lived connection or a place to enforce the same
- * JWT-cookie auth check on an upgraded socket. Polling REST on an
- * interval reuses the exact same authenticated fetch path as everything
- * else in the app, at the cost of up-to-`pollIntervalMs` staleness
- * instead of push updates.
- */
 export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
   const [positions, setPositions] = useState<AssetMarker[]>([]);
   const [positionsLoading, setPositionsLoading] = useState(true);
@@ -79,38 +65,50 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
   }, [loadGeofences]);
 
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
-      <Card>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
-          <h1 style={{ margin: 0 }}>Map</h1>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    <div className="grid gap-6">
+      <Card className="border border-border bg-card/40 p-6 backdrop-blur-sm">
+        <div className="flex items-center justify-between flex-wrap gap-4 border-b border-border/50 pb-4 mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              Map
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Asset tracking for your fleet, refreshed every {Math.round(pollIntervalMs / 1000)}s.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
             {positionsLoading && positions.length === 0 ? (
-              <Spinner size={14} label="Refreshing" />
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Spinner size={14} label="Refreshing" />
+                <span>Syncing...</span>
+              </div>
             ) : (
               <Badge tone={positionsError ? "danger" : "success"}>
-                {positionsError ? "Update failed" : "Live (polling)"}
+                {positionsError ? "Sync Error" : "Live Streaming"}
               </Badge>
             )}
             {lastPolledAt && (
-              <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                Updated {lastPolledAt.toLocaleTimeString()}
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <RefreshCw className="h-3 w-3 animate-spin-slow" />
+                {lastPolledAt.toLocaleTimeString()}
               </span>
             )}
           </div>
         </div>
-        <p style={{ color: "#6b7280", marginBottom: 0 }}>
-          Asset positions for your fleet, refreshed every {Math.round(pollIntervalMs / 1000)}s. This is a
-          list view of live positions, not an interactive map — see project notes for the V1 scope.
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          *Note: This dashboard delivers telemetry summaries, state feeds, and geo boundary breaches. Consult pilot specifications for V1 coverage boundaries.
         </p>
       </Card>
 
-      <Card>
-        <h2 style={{ marginTop: 0 }}>Asset positions</h2>
+      <Card className="border border-border bg-card p-6">
+        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2">Active Asset Feed</h2>
         {positionsLoading && positions.length === 0 ? (
-          <Spinner label="Loading asset positions" />
+          <div className="flex justify-center py-8">
+            <Spinner size={24} label="Loading asset positions" />
+          </div>
         ) : positionsError && positions.length === 0 ? (
-          <p role="alert" style={{ color: "#991b1b" }}>
-            {positionsError}
+          <p role="alert" className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 p-4 rounded-lg">
+            ⚠️ {positionsError}
           </p>
         ) : (
           <AssetPositionsTable positions={positions} />

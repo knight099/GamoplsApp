@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/session";
+import { Globe, ClipboardList, MessageSquare, Files, ArrowRight, ShieldCheck } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function HomePage() {
   const session = await getSession();
@@ -8,88 +10,115 @@ export default async function HomePage() {
     {
       title: "Geospatial Tracking",
       href: "/map",
-      desc: "Live asset tracking, real-time telemetry streaming, and dynamic geofencing exits monitor.",
-      icon: "🌐",
-      badgeColor: "cyan"
+      desc: "Live asset tracking, real-time telemetry streaming, and dynamic geofencing exit monitoring.",
+      icon: Globe,
+      colorClass: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5",
+      badgeText: "Real-time"
     },
     {
       title: "Operations Board",
       href: "/board",
-      desc: "Mission planning, task workflow management, and autonomous AI engine agent triage.",
-      icon: "📋",
-      badgeColor: "primary"
+      desc: "Mission planning, task workflow management, and autonomous AI health scoring triage.",
+      icon: ClipboardList,
+      colorClass: "text-blue-400 border-blue-500/20 bg-blue-500/5",
+      badgeText: "AI Engine"
     },
     {
       title: "Tactical Messaging",
       href: "/chat",
-      desc: "Instant dispatcher messaging, channel grouping, and automated mission warning logs.",
-      icon: "💬",
-      badgeColor: "emerald"
+      desc: "Instant dispatcher communications, group channels, and automated event log streaming.",
+      icon: MessageSquare,
+      colorClass: "text-emerald-400 border-emerald-500/20 bg-emerald-500/5",
+      badgeText: "Secure"
     },
     {
       title: "Fleet Knowledge Hub",
       href: "/hub",
-      desc: "Document metadata catalogs, keyword search indexing, and RAG knowledge base stubs.",
-      icon: "📂",
-      badgeColor: "warning"
+      desc: "Document metadata catalogs, keyword searching, and indexed technical schematics.",
+      icon: Files,
+      colorClass: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+      badgeText: "Knowledge"
     }
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem", maxWidth: 1000, margin: "0 auto" }}>
+    <div className="space-y-12">
       {/* Hero Welcome Banner */}
-      <section style={{ 
-        background: "linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%)", 
-        border: "1px solid var(--border-color)", 
-        borderRadius: "1.5rem", 
-        padding: "3rem",
-        boxShadow: "var(--shadow-card)"
-      }}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "1rem", background: "linear-gradient(to right, #fff, #94a3b8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          Human-Machine Fleet Control Cockpit
-        </h1>
-        <p style={{ fontSize: "1.125rem", color: "var(--text-muted)", maxWidth: 700, marginBottom: "2rem" }}>
-          GAMOPLS TeamCore provides real-time telemetry processing, mission task allocation, channel communications, and predictive model scoring for pilot edge boxes.
-        </p>
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card/50 p-8 md:p-12 shadow-2xl backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 opacity-30 pointer-events-none" />
+        
+        <div className="relative z-10 space-y-6">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400 border border-cyan-400/20">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Active Fleet Operation Shield
+          </div>
+          
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Human-Machine Fleet <br className="hidden md:inline" />
+            Control Cockpit
+          </h1>
+          
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl font-medium">
+            GAMOPLS TeamCore provides real-time telemetry processing, mission task allocation, channel communications, and predictive model scoring for pilot edge boxes.
+          </p>
 
-        {session ? (
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "1rem" }}>
-            <span style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Tenant Authorization:</span>
-            <span className="neon-badge neon-badge-primary">org: {session.org_id}</span>
-            <span className="neon-badge neon-badge-cyan">fleet: {session.fleet_id}</span>
-            <span className="neon-badge neon-badge-emerald">role: {session.role}</span>
-          </div>
-        ) : (
-          <div>
-            <Link href="/login" className="btn-premium btn-premium-primary" style={{ textDecoration: "none" }}>
-              Authenticate Fleet Access →
-            </Link>
-          </div>
-        )}
+          {session ? (
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Session Scopes:</span>
+              <span className="inline-flex items-center rounded-full bg-blue-400/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-400/20">org: {session.org_id}</span>
+              <span className="inline-flex items-center rounded-full bg-cyan-400/10 px-2.5 py-0.5 text-xs font-semibold text-cyan-400 border border-cyan-400/20">fleet: {session.fleet_id}</span>
+              <span className="inline-flex items-center rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-400/20">role: {session.role}</span>
+            </div>
+          ) : (
+            <div className="pt-2">
+              <Link href="/login" className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg hover:opacity-90 transition-opacity">
+                Authenticate Fleet Access
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Grid Modules */}
-      <div>
-        <h2 style={{ fontSize: "1.5rem", marginBottom: "1.5rem", borderBottom: "1px solid var(--border-color)", paddingBottom: "0.75rem" }}>
-          Operational Modules
-        </h2>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-white">Operational Modules</h2>
+          <p className="text-sm text-muted-foreground mt-1">Select an index below to manage telemetry and task workflows.</p>
+        </div>
         
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
-          {MODULES.map((mod) => (
-            <Link key={mod.href} href={mod.href} style={{ textDecoration: "none" }}>
-              <div className="saas-card" style={{ height: "100%", display: "flex", flexDirection: "column", justifyItems: "flex-start" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                  <span style={{ fontSize: "2rem" }}>{mod.icon}</span>
-                  <span className={`neon-badge neon-badge-${mod.badgeColor}`}>Ready</span>
-                </div>
-                <h3 style={{ fontSize: "1.25rem", marginBottom: "0.5rem" }}>{mod.title}</h3>
-                <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", flexGrow: 1 }}>{mod.desc}</p>
-                <div style={{ marginTop: "1.5rem", fontSize: "0.875rem", color: "var(--accent-cyan)", fontWeight: 600 }}>
-                  Access Module →
-                </div>
-              </div>
-            </Link>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {MODULES.map((mod) => {
+            const Icon = mod.icon;
+            return (
+              <Link key={mod.href} href={mod.href} className="group block">
+                <Card className="h-full border border-border bg-card/30 hover:bg-card/80 hover:border-muted-foreground/30 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1">
+                  <CardHeader className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-3 rounded-lg border ${mod.colorClass}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {mod.badgeText}
+                      </span>
+                    </div>
+                    <CardTitle className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                      {mod.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm font-medium text-muted-foreground leading-relaxed">
+                      {mod.desc}
+                    </CardDescription>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 mt-6 opacity-80 group-hover:opacity-100 transition-opacity">
+                      Open Module
+                      <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>

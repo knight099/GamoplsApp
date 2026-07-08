@@ -2,13 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import { Button } from "@gamopls/ui";
+import { Input } from "../ui/input";
+import { Send, ShieldAlert } from "lucide-react";
 
 export interface MessageComposerProps {
   onSend: (body: string) => Promise<void>;
   disabled?: boolean;
 }
 
-/** Simple text-only composer form for posting a new message to the selected channel. */
 export function MessageComposer({ onSend, disabled }: MessageComposerProps) {
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -31,30 +32,30 @@ export function MessageComposer({ onSend, disabled }: MessageComposerProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <input
+    <form onSubmit={handleSubmit} className="space-y-2 mt-auto">
+      <div className="flex gap-2">
+        <Input
           aria-label="Message"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           disabled={disabled || submitting}
-          placeholder="Write a message…"
-          style={{
-            flex: 1,
-            padding: "0.5rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.375rem",
-            fontSize: "0.875rem",
-          }}
+          placeholder="Type dispatcher instructions..."
+          className="flex-1 bg-background/50 border-border"
         />
-        <Button type="submit" disabled={disabled || submitting || !body.trim()}>
-          {submitting ? "Sending…" : "Send"}
+        <Button 
+          type="submit" 
+          disabled={disabled || submitting || !body.trim()}
+          style={{ padding: "0.5rem 1rem", minWidth: "4.5rem" }}
+        >
+          <Send className="h-4 w-4 mr-1 shrink-0" />
+          {submitting ? "..." : "Send"}
         </Button>
       </div>
       {error && (
-        <p role="alert" style={{ color: "#dc2626", fontSize: "0.8125rem", margin: 0 }}>
-          {error}
-        </p>
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg">
+          <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+          <span>{error}</span>
+        </div>
       )}
     </form>
   );

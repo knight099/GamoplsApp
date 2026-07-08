@@ -1,5 +1,6 @@
 import { Spinner } from "@gamopls/ui";
 import type { MissionChannel } from "./types";
+import { Hash } from "lucide-react";
 
 export interface ChannelListProps {
   channels: MissionChannel[];
@@ -9,19 +10,18 @@ export interface ChannelListProps {
   error: string | null;
 }
 
-/** Sidebar list of mission channels. */
 export function ChannelList({ channels, selectedChannelId, onSelect, loading, error }: ChannelListProps) {
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem" }}>
-        <Spinner size={14} /> <span style={{ fontSize: "0.875rem", color: "#6b7280" }}>Loading channels…</span>
+      <div className="flex items-center gap-2 py-4 justify-center text-xs text-muted-foreground">
+        <Spinner size={14} /> <span>Loading channels…</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <p role="alert" style={{ color: "#dc2626", fontSize: "0.875rem", padding: "0.75rem" }}>
+      <p role="alert" className="text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">
         {error}
       </p>
     );
@@ -29,14 +29,14 @@ export function ChannelList({ channels, selectedChannelId, onSelect, loading, er
 
   if (channels.length === 0) {
     return (
-      <p style={{ color: "#6b7280", fontSize: "0.875rem", padding: "0.75rem" }}>
+      <p className="text-xs font-medium text-muted-foreground p-3 text-center border border-dashed border-border rounded-lg">
         No mission channels yet — create one below.
       </p>
     );
   }
 
   return (
-    <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+    <ul className="space-y-1">
       {channels.map((channel) => {
         const isSelected = channel.id === selectedChannelId;
         return (
@@ -45,21 +45,19 @@ export function ChannelList({ channels, selectedChannelId, onSelect, loading, er
               type="button"
               onClick={() => onSelect(channel.id)}
               aria-pressed={isSelected}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                padding: "0.5rem 0.75rem",
-                border: "none",
-                borderRadius: "0.375rem",
-                background: isSelected ? "#dbeafe" : "transparent",
-                color: "#111827",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-              }}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150 cursor-pointer ${
+                isSelected 
+                  ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-semibold" 
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent"
+              }`}
             >
-              <div style={{ fontWeight: 600 }}>{channel.name}</div>
-              <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>mission:{channel.mission_id}</div>
+              <Hash className={`h-4 w-4 shrink-0 ${isSelected ? "text-cyan-400" : "text-muted-foreground/60"}`} />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm truncate">{channel.name}</div>
+                <div className={`text-[10px] ${isSelected ? "text-cyan-400/80" : "text-muted-foreground/60"}`}>
+                  mission: {channel.mission_id}
+                </div>
+              </div>
             </button>
           </li>
         );

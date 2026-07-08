@@ -1,17 +1,15 @@
 "use client";
 
-// See BoardView.tsx for why React is imported explicitly here (classic JSX
-// transform under vitest, per apps/web's Next-oriented tsconfig).
 import React, { useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "@gamopls/ui";
+import { Input } from "../ui/input";
+import { Plus, ShieldAlert } from "lucide-react";
 
 export interface MissionFormProps {
   onSubmit: (input: { title: string; description: string }) => Promise<void>;
 }
 
-/** Create-mission form: title + description only — Missions are generic
- * containers for Tasks, nothing asset-specific belongs here. */
 export function MissionForm({ onSubmit }: MissionFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -38,29 +36,47 @@ export function MissionForm({ onSubmit }: MissionFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-      <h3 style={{ margin: 0 }}>New mission</h3>
-      <label style={{ display: "flex", flexDirection: "column", fontSize: "0.875rem", gap: "0.25rem" }}>
-        Title
-        <input
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+        <Plus className="h-4 w-4 text-cyan-400" />
+        New mission
+      </h3>
+      <div className="space-y-1">
+        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Title
+        </label>
+        <Input
           aria-label="Mission title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          style={{ padding: "0.375rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem" }}
+          placeholder="e.g. Operation Deep Scan"
+          className="h-8 text-xs bg-background/50 border-border"
         />
-      </label>
-      <label style={{ display: "flex", flexDirection: "column", fontSize: "0.875rem", gap: "0.25rem" }}>
-        Description
+      </div>
+      <div className="space-y-1">
+        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Description
+        </label>
         <textarea
           aria-label="Mission description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
-          style={{ padding: "0.375rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem" }}
+          placeholder="Detailed mission objectives..."
+          className="w-full text-xs bg-background/50 border border-border rounded-md p-2 text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
-      </label>
-      {error && <p style={{ color: "#991b1b", fontSize: "0.875rem", margin: 0 }}>{error}</p>}
-      <Button type="submit" disabled={submitting}>
+      </div>
+      {error && (
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg">
+          <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+      <Button 
+        type="submit" 
+        disabled={submitting || !title.trim()}
+        style={{ width: "100%", padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
+      >
         {submitting ? "Creating…" : "Create mission"}
       </Button>
     </form>

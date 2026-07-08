@@ -8,20 +8,14 @@ import { MessageComposer } from "./MessageComposer";
 import { MessageList } from "./MessageList";
 import { NewChannelForm } from "./NewChannelForm";
 import type { ChatMessage, MissionChannel } from "./types";
+import { MessageSquareDot } from "lucide-react";
 
 export interface ChatViewProps {
-  /** Current user's org/fleet scope and identity, resolved server-side from the session JWT (see app/chat/page.tsx). */
   orgId: string;
   fleetId: string;
   userId: string;
 }
 
-/**
- * Client-side orchestrator for the CHAT view: lists mission channels, shows
- * the selected channel's messages, and lets the user post new messages or
- * create a new channel. Talks to the backend exclusively via `/api/chat/...`
- * (see components/chat/api.ts) — never services/chat directly.
- */
 export function ChatView({ orgId, fleetId, userId }: ChatViewProps) {
   const [channels, setChannels] = useState<MissionChannel[]>([]);
   const [channelsLoading, setChannelsLoading] = useState(true);
@@ -84,10 +78,12 @@ export function ChatView({ orgId, fleetId, userId }: ChatViewProps) {
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "1rem", alignItems: "start" }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <Card>
-          <h2 style={{ fontSize: "0.9375rem", margin: "0 0 0.5rem" }}>Mission channels</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <div className="lg:col-span-1 flex flex-col gap-6">
+        <Card className="border border-border bg-card p-4">
+          <h2 className="text-xs font-bold text-white mb-3 uppercase tracking-wider text-muted-foreground">
+            Mission Channels
+          </h2>
           <ChannelList
             channels={channels}
             selectedChannelId={selectedChannelId}
@@ -99,18 +95,22 @@ export function ChatView({ orgId, fleetId, userId }: ChatViewProps) {
         <NewChannelForm onCreate={handleCreateChannel} />
       </div>
 
-      <Card style={{ display: "flex", flexDirection: "column", gap: "1rem", minHeight: "20rem" }}>
-        {selectedChannelId ? (
-          <>
-            <MessageList messages={messages} loading={messagesLoading} error={messagesError} />
-            <MessageComposer onSend={handleSendMessage} disabled={messagesLoading} />
-          </>
-        ) : (
-          <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-            {channelsLoading ? "Loading…" : "Select a mission channel to view its messages."}
-          </p>
-        )}
-      </Card>
+      <div className="lg:col-span-3">
+        <Card className="border border-border bg-card p-6 flex flex-col min-h-[450px]">
+          {selectedChannelId ? (
+            <div className="flex flex-col flex-1 justify-between gap-4">
+              <MessageList messages={messages} loading={messagesLoading} error={messagesError} />
+              <MessageComposer onSend={handleSendMessage} disabled={messagesLoading} />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-24 text-center text-muted-foreground">
+              <p className="text-sm font-medium">
+                {channelsLoading ? "Syncing..." : "No active channel selected."}
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

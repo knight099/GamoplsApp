@@ -8,10 +8,26 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_STYLES: Record<ButtonVariant, React.CSSProperties> = {
-  primary: { background: "#2563eb", color: "#fff", border: "1px solid #2563eb" },
-  secondary: { background: "#fff", color: "#1f2937", border: "1px solid #d1d5db" },
-  danger: { background: "#dc2626", color: "#fff", border: "1px solid #dc2626" },
-  ghost: { background: "transparent", color: "#1f2937", border: "1px solid transparent" },
+  primary: { 
+    background: "var(--primary, #3b82f6)", 
+    color: "var(--primary-foreground, #fff)", 
+    border: "1px solid var(--primary, #3b82f6)" 
+  },
+  secondary: { 
+    background: "var(--secondary, #1e293b)", 
+    color: "var(--secondary-foreground, #f3f4f6)", 
+    border: "1px solid var(--border, rgba(255,255,255,0.1))" 
+  },
+  danger: { 
+    background: "var(--destructive, #ef4444)", 
+    color: "var(--destructive-foreground, #fff)", 
+    border: "1px solid var(--destructive, #ef4444)" 
+  },
+  ghost: { 
+    background: "transparent", 
+    color: "var(--foreground, #fff)", 
+    border: "1px solid transparent" 
+  },
 };
 
 const BASE_STYLE: React.CSSProperties = {
@@ -20,14 +36,16 @@ const BASE_STYLE: React.CSSProperties = {
   justifyContent: "center",
   gap: "0.5rem",
   padding: "0.5rem 1rem",
-  borderRadius: "0.375rem",
+  borderRadius: "var(--radius, 0.375rem)",
   fontSize: "0.875rem",
-  fontWeight: 500,
+  fontWeight: 600,
   cursor: "pointer",
   lineHeight: 1.25,
+  fontFamily: "inherit",
+  transition: "background-color 0.2s, border-color 0.2s, opacity 0.2s",
 };
 
-/** Minimal shared button primitive. Not a design system — just enough to avoid ad-hoc buttons. */
+/** Minimal shared button primitive. Inherits themes dynamically. */
 export function Button({ variant = "primary", style, children, ...rest }: ButtonProps) {
   return (
     <button

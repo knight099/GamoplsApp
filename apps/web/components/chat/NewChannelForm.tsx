@@ -2,12 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { Button, Card } from "@gamopls/ui";
+import { Input } from "../ui/input";
+import { Plus, ShieldAlert } from "lucide-react";
 
 export interface NewChannelFormProps {
   onCreate: (input: { mission_id: string; name: string }) => Promise<void>;
 }
 
-/** Small form for creating a new mission channel. */
 export function NewChannelForm({ onCreate }: NewChannelFormProps) {
   const [missionId, setMissionId] = useState("");
   const [name, setName] = useState("");
@@ -33,33 +34,47 @@ export function NewChannelForm({ onCreate }: NewChannelFormProps) {
   }
 
   return (
-    <Card>
-      <h2 style={{ fontSize: "0.9375rem", margin: "0 0 0.5rem" }}>New mission channel</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8125rem" }}>
+    <Card className="border border-border bg-card p-4">
+      <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5">
+        <Plus className="h-4 w-4 text-cyan-400" />
+        New Mission Channel
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <label className="block space-y-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           Mission ID
-          <input
+          <Input
             value={missionId}
             onChange={(e) => setMissionId(e.target.value)}
             disabled={submitting}
-            style={{ padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+            placeholder="e.g. mission-101"
+            className="h-8 text-xs bg-background/50 border-border font-medium normal-case"
           />
         </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8125rem" }}>
+        
+        <label className="block space-y-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           Channel name
-          <input
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={submitting}
-            style={{ padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+            placeholder="e.g. squad-bravo-chat"
+            className="h-8 text-xs bg-background/50 border-border font-medium normal-case"
           />
         </label>
+
         {error && (
-          <p role="alert" style={{ color: "#dc2626", fontSize: "0.8125rem", margin: 0 }}>
-            {error}
-          </p>
+          <div className="flex items-center gap-1.5 text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg">
+            <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+            <span>{error}</span>
+          </div>
         )}
-        <Button type="submit" variant="secondary" disabled={submitting || !missionId.trim() || !name.trim()}>
+
+        <Button 
+          type="submit" 
+          variant="secondary" 
+          disabled={submitting || !missionId.trim() || !name.trim()}
+          style={{ width: "100%", padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
+        >
           {submitting ? "Creating…" : "Create channel"}
         </Button>
       </form>

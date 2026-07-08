@@ -1,12 +1,5 @@
 "use client";
 
-// Explicit default React import: apps/web's tsconfig sets jsx: "preserve"
-// (required so Next's own compiler owns the JSX transform at build time),
-// which makes vitest's esbuild fall back to the classic JSX transform for
-// test runs — that transform expects `React` in module scope, unlike the
-// automatic runtime `packages/ui` uses. Keeping this per-file avoids
-// changing the shared apps/web/vitest.config.ts (other in-flight agents'
-// suites depend on its current "node" environment).
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge, Card, Spinner } from "@gamopls/ui";
 import * as boardApi from "./api";
@@ -15,6 +8,7 @@ import { TaskForm } from "./TaskForm";
 import { TaskCard } from "./TaskCard";
 import { TASK_STATUSES } from "./types";
 import type { Mission, Task, TaskStatus } from "./types";
+import { ListFilter, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -22,14 +16,6 @@ const STATUS_FILTER_ALL = "all" as const;
 const MISSION_FILTER_ALL = "all" as const;
 const MISSION_FILTER_UNASSIGNED = "unassigned" as const;
 
-/**
- * BOARD view — lists Missions and Tasks for the fleet manager to triage,
- * including 'draft' tasks auto-created from TaskSuggested events (flagged
- * with an "AI Suggested" badge, see TaskCard). All data comes from
- * services/board via the gateway (fetch('/api/board/...') only, per
- * apps/web/lib/gateway-proxy.ts) — nothing here reads or renders
- * asset-type-specific fields (CLAUDE.md: Mission/Task are asset-agnostic).
- */
 export function BoardView() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -103,18 +89,25 @@ export function BoardView() {
 
   if (state === "loading") {
     return (
-      <Card>
-        <Spinner label="Loading board" />
-      </Card>
+      <div className="flex justify-center items-center py-24">
+        <Spinner size={32} label="Loading board" />
+      </div>
     );
   }
 
   if (state === "error") {
     return (
-      <Card>
-        <h2 style={{ marginTop: 0 }}>Board</h2>
-        <p style={{ color: "#991b1b" }}>{error}</p>
-        <button onClick={() => void loadAll()} style={{ cursor: "pointer" }}>
+      <Card className="border border-border bg-card p-6 text-center max-w-lg mx-auto mt-12 space-y-4">
+        <div className="flex justify-center">
+          <AlertCircle className="h-12 w-12 text-rose-400" />
+        </div>
+        <h2 className="text-xl font-bold text-white">Board</h2>
+        <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">{error}</p>
+        <button 
+          onClick={() => void loadAll()} 
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 cursor-pointer"
+        >
+          <RefreshCw className="h-4 w-4" />
           Retry
         </button>
       </Card>
@@ -122,52 +115,75 @@ export function BoardView() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ margin: 0 }}>Board</h1>
+    <div className="space-y-8">
+      {/* Header section */}
+      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-border/50 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            Board
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage active dispatcher missions and queue asset automation tasks.
+          </p>
+        </div>
         {draftCount > 0 && (
-          <Badge tone="warning">
+          <Badge tone="warning" style={{ fontSize: "11px", padding: "0.25rem 0.75rem" }}>
+            <Sparkles className="h-3.5 w-3.5 mr-1.5 text-amber-400 animate-pulse" />
             {draftCount} AI-suggested draft{draftCount === 1 ? "" : "s"} to triage
           </Badge>
         )}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-        <Card>
+      {/* Forms layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="border border-border bg-card/40 p-6 backdrop-blur-sm">
           <MissionForm onSubmit={handleCreateMission} />
         </Card>
-        <Card>
+        <Card className="border border-border bg-card/40 p-6 backdrop-blur-sm">
           <TaskForm missions={missions} onSubmit={handleCreateTask} />
         </Card>
       </div>
 
-      <Card>
-        <h2 style={{ marginTop: 0 }}>Missions</h2>
+      {/* Missions list */}
+      <Card className="border border-border bg-card p-6">
+        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2">Missions</h2>
         {missions.length === 0 ? (
-          <p style={{ color: "#6b7280" }}>No missions yet — create one above.</p>
+          <p className="text-sm text-muted-foreground text-center py-6 border border-dashed border-border rounded-lg">
+            No missions yet — create one above.
+          </p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {missions.map((mission) => (
-              <li key={mission.id} style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>{mission.title}</span>
-                <Badge tone={mission.status === "active" ? "success" : "neutral"}>{mission.status}</Badge>
+              <li 
+                key={mission.id} 
+                className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-background/40 hover:bg-background/80 transition-colors"
+              >
+                <span className="font-semibold text-sm text-white">{mission.title}</span>
+                <Badge tone={mission.status === "active" ? "success" : "neutral"} style={{ fontSize: "10px" }}>
+                  {mission.status}
+                </Badge>
               </li>
             ))}
           </ul>
         )}
       </Card>
 
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h2 style={{ margin: 0 }}>Tasks</h2>
-          <div style={{ display: "flex", gap: "0.75rem" }}>
-            <label style={{ fontSize: "0.875rem", display: "flex", gap: "0.375rem", alignItems: "center" }}>
+      {/* Tasks listing with filters */}
+      <Card className="border border-border bg-card p-6">
+        <div className="flex justify-between items-center flex-wrap gap-4 mb-6 border-b border-border/50 pb-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            Tasks
+          </h2>
+          
+          <div className="flex gap-4 flex-wrap">
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+              <ListFilter className="h-3.5 w-3.5 text-cyan-400" />
               Mission
               <select
                 aria-label="Filter by mission"
                 value={missionFilter}
                 onChange={(e) => setMissionFilter(e.target.value)}
-                style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem" }}
+                className="h-8 px-2.5 rounded-md bg-background/50 border border-border text-xs text-foreground focus-visible:outline-none cursor-pointer"
               >
                 <option value={MISSION_FILTER_ALL}>All</option>
                 <option value={MISSION_FILTER_UNASSIGNED}>Unassigned</option>
@@ -178,18 +194,19 @@ export function BoardView() {
                 ))}
               </select>
             </label>
-            <label style={{ fontSize: "0.875rem", display: "flex", gap: "0.375rem", alignItems: "center" }}>
+            
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
               Status
               <select
                 aria-label="Filter by status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as TaskStatus | typeof STATUS_FILTER_ALL)}
-                style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem" }}
+                className="h-8 px-2.5 rounded-md bg-background/50 border border-border text-xs text-foreground focus-visible:outline-none cursor-pointer"
               >
                 <option value={STATUS_FILTER_ALL}>All</option>
                 {TASK_STATUSES.map((status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {status.replace("_", " ")}
                   </option>
                 ))}
               </select>
@@ -198,9 +215,11 @@ export function BoardView() {
         </div>
 
         {filteredTasks.length === 0 ? (
-          <p style={{ color: "#6b7280" }}>No tasks match the current filters.</p>
+          <p className="text-sm text-muted-foreground text-center py-12 border border-dashed border-border rounded-lg">
+            No tasks match the current filters.
+          </p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <div className="space-y-4">
             {filteredTasks.map((task) => (
               <TaskCard
                 key={task.id}
