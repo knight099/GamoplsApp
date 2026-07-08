@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test/coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Go
+services/core-ingestion/bin/
+
+# Python
+services/ai-engine/__pycache__/
+services/ai-engine/.venv/
+services/ai-engine/*.egg-info/
+services/ai-engine/.pytest_cache/
+
+# Misc
+*.pid

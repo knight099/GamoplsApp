@@ -1,0 +1,28 @@
+{
+  "name": "@gamopls/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared tsconfig/eslint/prettier base config for the GAMOPLS TeamCore monorepo. Config only — no runtime code.",
+  "license": "UNLICENSED",
+  "files": [
+    "tsconfig.base.json",
+    "eslint.config.mjs",
+    "prettier.config.mjs"
+  ],
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint": "./eslint.config.mjs",
+    "./prettier": "./prettier.config.mjs"
+  },
+  "scripts": {
+    "build": "echo 'no build step for config package' && exit 0",
+    "lint": "echo 'no lint step for config package' && exit 0",
+    "test": "echo 'no tests for config package' && exit 0"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.3"
+  }
+}

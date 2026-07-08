@@ -1,0 +1,39 @@
+{
+  "name": "@gamopls/registry",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CORE plugin registry — minimal Fastify service where Asset Type / Ingestion / Rule / Agent plugins self-register over HTTP ({type, capabilities, endpoint}) and module services can read what asset types/capabilities exist. V1 storage is an in-memory Map (no Postgres wiring needed for this alone).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/server.ts --format esm --dts --clean",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "lint": "eslint . --config ../../packages/config/eslint.config.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fastify": "^5.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@gamopls/config": "workspace:*",
+    "@types/node": "^20.14.0",
+    "eslint": "^9.15.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

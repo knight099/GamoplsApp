@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "//#check:architecture": {
+      "inputs": [
+        "services/*/package.json",
+        "services/*/src/**",
+        "plugins/*/package.json",
+        "scripts/check-architecture-rules.mjs"
+      ],
+      "outputs": []
+    }
+  }
+}

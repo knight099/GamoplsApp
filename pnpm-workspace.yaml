@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "services/map"
+  - "services/chat"
+  - "services/board"
+  - "services/hub"
+  - "services/registry"
+  - "packages/*"
+  - "plugins/*"
+
+onlyBuiltDependencies:
+  - esbuild

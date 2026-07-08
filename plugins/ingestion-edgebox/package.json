@@ -1,0 +1,34 @@
+{
+  "name": "@gamopls/ingestion-edgebox",
+  "version": "0.0.0",
+  "private": true,
+  "description": "V1 Ingestion Plugin — Edge Box MQTT protocol adapter. Parses raw Edge Box telemetry payloads into normalized AssetLocationUpdated/AssetHealthChanged events (@gamopls/event-schemas). All Edge Box protocol-specific parsing logic lives here and nowhere else.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "lint": "eslint . --config ../../packages/config/eslint.config.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@gamopls/event-schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "@gamopls/config": "workspace:*",
+    "eslint": "^9.15.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

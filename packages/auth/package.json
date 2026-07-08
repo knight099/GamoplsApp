@@ -1,0 +1,35 @@
+{
+  "name": "@gamopls/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Self-issued JWT issuance/verification for org_id/fleet_id/role/user_id claims. Used by apps/web's demo login flow and its BFF gateway route handlers to enforce multi-tenancy scoping before requests reach map/chat/board/hub. Swappable for Auth0/Clerk later — this is a V1 placeholder identity layer, not a full user-management system.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "lint": "eslint . --config ../config/eslint.config.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "jose": "^5.9.6"
+  },
+  "devDependencies": {
+    "@gamopls/config": "workspace:*",
+    "@types/node": "^20.14.0",
+    "eslint": "^9.15.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

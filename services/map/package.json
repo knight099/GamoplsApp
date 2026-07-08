@@ -1,0 +1,46 @@
+{
+  "name": "@gamopls/map",
+  "version": "0.0.0",
+  "private": true,
+  "description": "services/map — geospatial/live-tracking service. Subscribes to AssetLocationUpdated over the event bus, maintains a live position cache (Redis), owns geofence CRUD + exit detection (publishes AlertRaised), and exposes a REST + WebSocket Fastify API for current asset positions. Depends only on @gamopls/asset-contracts and @gamopls/event-schemas (+ @gamopls/event-bus-nats for the concrete transport) — never on a concrete Asset Type Plugin.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/server.ts --format esm --dts --clean",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "lint": "eslint . --config ../../packages/config/eslint.config.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/websocket": "^11.0.2",
+    "@gamopls/asset-contracts": "workspace:*",
+    "@gamopls/event-bus-nats": "workspace:*",
+    "@gamopls/event-schemas": "workspace:*",
+    "fastify": "^5.1.0",
+    "ioredis": "^5.4.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@gamopls/config": "workspace:*",
+    "@types/node": "^20.14.0",
+    "@types/ws": "^8.5.12",
+    "eslint": "^9.15.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4",
+    "ws": "^8.18.0"
+  }
+}
