@@ -80,7 +80,7 @@ export function ChatView({ orgId, fleetId, userId }: ChatViewProps) {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
       <div className="lg:col-span-1 flex flex-col gap-6">
         <Card className="border border-border bg-card p-4">
-          <h2 className="text-xs font-bold text-white mb-3 uppercase tracking-wider text-muted-foreground">
+          <h2 className="text-xs font-bold text-foreground mb-3 uppercase tracking-wider text-muted-foreground">
             Mission Channels
           </h2>
           <ChannelList

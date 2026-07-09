@@ -47,14 +47,14 @@ export function ChannelList({ channels, selectedChannelId, onSelect, loading, er
               aria-pressed={isSelected}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150 cursor-pointer ${
                 isSelected 
-                  ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-semibold" 
+                  ? "bg-primary/10 border border-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent"
               }`}
             >
-              <Hash className={`h-4 w-4 shrink-0 ${isSelected ? "text-cyan-400" : "text-muted-foreground/60"}`} />
+              <Hash className={`h-4 w-4 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground/60"}`} />
               <div className="min-w-0 flex-1">
                 <div className="text-sm truncate">{channel.name}</div>
-                <div className={`text-[10px] ${isSelected ? "text-cyan-400/80" : "text-muted-foreground/60"}`}>
+                <div className={`text-[10px] ${isSelected ? "text-primary/80" : "text-muted-foreground/60"}`}>
                   mission: {channel.mission_id}
                 </div>
               </div>

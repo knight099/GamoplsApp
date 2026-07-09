@@ -56,7 +56,7 @@ export function MessageList({ messages, loading, error }: MessageListProps) {
           >
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
-                <span className={`font-semibold text-xs ${isSystem ? "text-rose-400" : "text-white"}`}>
+                <span className={`font-semibold text-xs ${isSystem ? "text-rose-400" : "text-foreground"}`}>
                   {message.senderId}
                 </span>
                 {isSystem && (
@@ -74,7 +74,7 @@ export function MessageList({ messages, loading, error }: MessageListProps) {
                   href={message.media.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                 >
                   📎 {message.media.filename} 
                   <span className="text-[10px] text-muted-foreground/80 font-normal">
