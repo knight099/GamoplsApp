@@ -6,6 +6,8 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Globe, MessageSquare, ClipboardList, Files, Truck, Zap, LogOut } from "lucide-react";
 import { FleetSwitcher } from "@/components/fleet/FleetSwitcher";
+import { ThemeProvider } from "next-themes";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -26,8 +28,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const session = await getSession();
 
   return (
-    <html lang="en" className={cn("font-sans dark", geist.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body className="bg-background text-foreground antialiased min-h-screen">
+        <ThemeProvider attribute="class" defaultTheme="dark">
         <div className="flex min-h-screen">
           {/* High Fidelity Sidebar */}
           <aside className="w-64 fixed inset-y-0 left-0 bg-card border-r border-border flex flex-col z-50">
@@ -50,7 +53,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               })}
             </nav>
 
-            <div className="p-4 border-t border-border mt-auto bg-muted/30">
+            <div className="p-4 border-t border-border mt-auto bg-muted/30 space-y-3">
+              <ThemeToggle />
               {session ? (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
@@ -102,6 +106,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </main>
           </div>
         </div>
+        </ThemeProvider>
       </body>
     </html>
   );
