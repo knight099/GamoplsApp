@@ -15,6 +15,7 @@ export class PrismaAssetRepository implements AssetRepository {
       health_score: db.health_score,
       telemetry: db.telemetry as Record<string, unknown>,
       telemetry_updated_at: db.telemetry_updated_at ? db.telemetry_updated_at.toISOString() : null,
+      last_mileage_kmpl: db.last_mileage_kmpl === null ? null : Number(db.last_mileage_kmpl),
       created_at: db.created_at.toISOString(),
       updated_at: db.updated_at.toISOString(),
     };
@@ -51,5 +52,9 @@ export class PrismaAssetRepository implements AssetRepository {
       where: { id },
       data: { health_score, telemetry, telemetry_updated_at: new Date() },
     });
+  }
+
+  async updateMileage(id: string, last_mileage_kmpl: number | null): Promise<void> {
+    await this.prisma.asset.update({ where: { id }, data: { last_mileage_kmpl } });
   }
 }

@@ -62,6 +62,7 @@ export const assetSchema = z.object({
   health_score: z.number().min(0).max(100),
   telemetry: z.record(z.string(), z.unknown()),
   telemetry_updated_at: z.string().datetime().nullable(),
+  last_mileage_kmpl: z.number().nullable(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });

@@ -15,6 +15,9 @@ import type { FleetRepository } from "./fleet-repository.js";
 import type { DriverRepository } from "./driver-repository.js";
 import type { AssetRepository } from "./asset-repository.js";
 import type { AssignmentRepository } from "./assignment-repository.js";
+import { InMemoryMaintenanceSuggestionRepository } from "./in-memory-maintenance-suggestion-repository.js";
+import { PrismaMaintenanceSuggestionRepository } from "./prisma-maintenance-suggestion-repository.js";
+import type { MaintenanceSuggestionRepository } from "./maintenance-suggestion-repository.js";
 
 const port = Number(process.env.PORT ?? 4600);
 const host = process.env.HOST ?? "0.0.0.0";
@@ -26,6 +29,7 @@ let fleetRepo: FleetRepository;
 let driverRepo: DriverRepository;
 let assetRepo: AssetRepository;
 let assignmentRepo: AssignmentRepository;
+let suggestionRepo: MaintenanceSuggestionRepository;
 
 if (databaseUrl) {
   console.log("fleet: using Neon Postgres database via Prisma");
@@ -34,12 +38,14 @@ if (databaseUrl) {
   driverRepo = new PrismaDriverRepository(prisma);
   assetRepo = new PrismaAssetRepository(prisma);
   assignmentRepo = new PrismaAssignmentRepository(prisma);
+  suggestionRepo = new PrismaMaintenanceSuggestionRepository(prisma);
 } else {
   console.warn("fleet: DATABASE_URL not set — running with in-memory (non-persistent) stores.");
   fleetRepo = new InMemoryFleetRepository();
   driverRepo = new InMemoryDriverRepository();
   assetRepo = new InMemoryAssetRepository();
   assignmentRepo = new InMemoryAssignmentRepository();
+  suggestionRepo = new InMemoryMaintenanceSuggestionRepository();
 }
 
 const vehiclePluginClient = new VehiclePluginClient({ baseUrl: vehiclePluginUrl });
@@ -49,7 +55,7 @@ async function main() {
   try {
     const bus = new NatsEventBus({ servers: natsServers, name: "fleet" });
     await bus.connect();
-    await subscribeAssetHealthChanged(bus, assetRepo);
+    await subscribeAssetHealthChanged(bus, assetRepo, { vehiclePluginClient, suggestionRepo, publisher: bus });
     app.log.info(`fleet: subscribed to AssetHealthChanged via NATS at ${natsServers}`);
   } catch (err) {
     app.log.warn(`fleet: could not connect to NATS at ${natsServers}, AssetHealthChanged subscription disabled: ${err}`);
