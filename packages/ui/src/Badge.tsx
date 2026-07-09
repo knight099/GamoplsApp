@@ -8,10 +8,10 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const TONE_STYLES: Record<BadgeTone, React.CSSProperties> = {
-  neutral: { 
-    background: "rgba(255, 255, 255, 0.05)", 
-    color: "var(--muted-foreground, #9ca3af)", 
-    borderColor: "var(--border, rgba(255,255,255,0.08))" 
+  neutral: {
+    background: "var(--muted)",
+    color: "var(--muted-foreground)",
+    borderColor: "var(--border)"
   },
   success: { 
     background: "rgba(16, 185, 129, 0.15)", 
