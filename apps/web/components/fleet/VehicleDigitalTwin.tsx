@@ -118,7 +118,9 @@ export function VehicleDigitalTwin({ telemetry, healthScore }: VehicleDigitalTwi
             strokeWidth={2}
             style={{ cursor: "pointer" }}
             onClick={() => setSelected(h)}
-          />
+          >
+            <title>{`${h.label}: ${formatValue(h)}`}</title>
+          </circle>
         ))}
       </svg>
 

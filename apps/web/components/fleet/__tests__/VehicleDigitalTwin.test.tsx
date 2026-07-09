@@ -42,19 +42,20 @@ describe("VehicleDigitalTwin", () => {
   it("renders all four hotspot labels and shows detail on click", () => {
     render(<VehicleDigitalTwin telemetry={{ engine_temp_c: 91, battery_pct: 76, fuel_pct: 54 }} healthScore={88} />);
 
-    expect(screen.getByText(/Engine/)).toBeInTheDocument();
-    expect(screen.getByText(/Battery/)).toBeInTheDocument();
-    expect(screen.getByText(/Fuel/)).toBeInTheDocument();
-    expect(screen.getByText(/Overall/)).toBeInTheDocument();
+    expect(screen.getByTestId("legend-engine")).toHaveTextContent("Engine");
+    expect(screen.getByTestId("legend-battery")).toHaveTextContent("Battery");
+    expect(screen.getByTestId("legend-fuel")).toHaveTextContent("Fuel");
+    expect(screen.getByTestId("legend-overall")).toHaveTextContent("Overall");
 
     const engineHotspot = screen.getByTestId("hotspot-engine");
+    expect(engineHotspot.querySelector("title")).toHaveTextContent("Engine: 91°C");
     fireEvent.click(engineHotspot);
-    expect(screen.getByText("Engine: 91°C")).toBeInTheDocument();
+    expect(screen.getByText("Engine: 91°C", { selector: "p" })).toBeInTheDocument();
   });
 
   it("shows 'No data' for a hotspot with no matching telemetry", () => {
     render(<VehicleDigitalTwin telemetry={{}} healthScore={100} />);
     fireEvent.click(screen.getByTestId("hotspot-battery"));
-    expect(screen.getByText("Battery: No data")).toBeInTheDocument();
+    expect(screen.getByText("Battery: No data", { selector: "p" })).toBeInTheDocument();
   });
 });
