@@ -40,11 +40,11 @@ export default function LoginPage() {
       <Card className="border border-border bg-card shadow-2xl backdrop-blur-sm">
         <CardHeader className="space-y-3 text-center pb-6">
           <div className="flex justify-center">
-            <div className="p-3 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-              <Zap className="h-8 w-8 fill-cyan-400/10 animate-pulse" />
+            <div className="p-3 rounded-full bg-primary/10 border border-primary/20 text-primary">
+              <Zap className="h-8 w-8 fill-primary/10 animate-pulse" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-white tracking-tight">
+          <CardTitle className="text-2xl font-bold text-foreground tracking-tight">
             Authorized Control Login
           </CardTitle>
           <CardDescription className="text-sm font-medium text-muted-foreground">
@@ -63,7 +63,7 @@ export default function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter dispatcher username"
                 required
-                className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-cyan-500/50"
+                className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-ring"
               />
             </div>
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-cyan-500/50"
+                className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-ring"
               />
             </div>
 
@@ -90,7 +90,7 @@ export default function LoginPage() {
 
             <button 
               type="submit" 
-              className="w-full flex items-center justify-center h-10 px-4 rounded-lg bg-cyan-500 text-white font-semibold text-sm hover:bg-cyan-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+              className="w-full flex items-center justify-center h-10 px-4 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
               disabled={submitting}
             >
               {submitting ? "Authenticating Session..." : "Authorize Access"}
