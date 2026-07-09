@@ -47,3 +47,6 @@ services/ai-engine/.pytest_cache/
 
 # superpowers brainstorming scratch
 .superpowers/
+
+# agent worktrees
+.claude/
