@@ -4,6 +4,8 @@
 
 V1 backend work (Phases 0–7.4 of `PLAN.md`) is complete. `apps/web` already went through one visual pass in recent commits (Tailwind v4 + shadcn/ui, "premium dark SaaS dashboard") — the sidebar/header shell, homepage, `MapView`, and `BoardView` all use a dark theme with hardcoded cyan/blue/emerald Tailwind utility classes (`text-cyan-400`, `bg-blue-400/10`, etc.) layered on top of the shadcn CSS-variable token system.
 
+**2026-07-10 update:** this spec was written before Phase 8.A–8.D (fleet/vehicle/driver management, the interactive map, the digital twin dashboard, and maintenance/fleet optimization) were built. Those additions — `components/fleet/*`, `components/map/MapCanvas.tsx`, `app/fleet/*` — were built to match the *existing* dark theme and carry the identical hardcoded-color pattern (confirmed via `grep -rl "cyan-400\|blue-400\|emerald-400" components/fleet components/map/MapCanvas.tsx app/fleet`). The design below (themes, tokens, mechanism) is unchanged and still approved — only the **Scope of changes** section is amended to include this newer UI, so the restyle covers the whole app as originally intended rather than leaving the newest third of it out.
+
 This spec replaces that ad-hoc color layer with a deliberate two-theme system (light + dark), selected via the brainstorming skill's visual companion (see `.superpowers/brainstorm/68018-1783610168/content/` for the explored mockups: `visual-direction.html`, `theme-mockup.html`, `typography-radius.html`).
 
 ## Goals
@@ -57,6 +59,9 @@ Every page and its subcomponents get the token-based color pass — no page is s
 - `components/chat/*` (`ChatView`, `ChannelList`, `MessageList`, `MessageComposer`, `NewChannelForm`)
 - `components/board/*` (`BoardView`, `MissionForm`, `TaskForm`, `TaskCard`)
 - `components/hub/*` (`HubView`, `DocumentTable`, `SearchPanel`, `UploadForm`)
+- `components/fleet/*` (`VehiclesPanel`, `DriversPanel`, `AddVehicleForm`, `AddDriverForm`, `VehiclesTable`, `DriversTable`, `FleetSwitcher`, `MaintenanceCard`, `VehicleDigitalTwin`) — added in Phase 8.A/8.D, same hardcoded-color pattern as the rest of the app
+- `components/map/MapCanvas.tsx` — added in Phase 8.B; its health-tone marker colors (green/amber/red dots) are status colors, not theme accents, and stay as-is per this spec's "Status colors" section — only its non-status chrome (popup background/text, "More details" link color) needs the token pass
+- `app/fleet/page.tsx`, `app/fleet/vehicles/[id]/page.tsx` — added in Phase 8.A/8.B/8.C/8.D
 - `packages/ui/src/Badge.tsx` — token-based tone colors (see above)
 - `packages/ui/src/Card.tsx`, `Button.tsx`, `Spinner.tsx` — already token-based (verified during design); no change expected beyond spot-checking they render correctly in light mode, since they were only ever exercised in dark mode until now
 - `components/ui/*` (shadcn primitives: `button.tsx`, `card.tsx`, `dialog.tsx`, `input.tsx`, `tabs.tsx`) — spot-check for hardcoded colors, fix if found
