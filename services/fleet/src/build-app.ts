@@ -7,17 +7,21 @@ import { InMemoryAssetRepository } from "./in-memory-asset-repository.js";
 import type { AssetRepository } from "./asset-repository.js";
 import { VehiclePluginClient, VehiclePluginClientError } from "./vehicle-plugin-client.js";
 import type { VehiclePluginClient as VehiclePluginClientType } from "./vehicle-plugin-client.js";
+import { InMemoryAssignmentRepository } from "./in-memory-assignment-repository.js";
+import type { AssignmentRepository } from "./assignment-repository.js";
 import {
   createFleetInputSchema,
   createDriverInputSchema,
   updateDriverInputSchema,
   createVehicleAssetInputSchema,
+  assignDriverInputSchema,
 } from "./types.js";
 
 export interface BuildAppOptions {
   fleetRepo?: FleetRepository;
   driverRepo?: DriverRepository;
   assetRepo?: AssetRepository;
+  assignmentRepo?: AssignmentRepository;
   vehiclePluginClient?: VehiclePluginClientType;
 }
 
@@ -26,6 +30,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const fleetRepo = options.fleetRepo ?? new InMemoryFleetRepository();
   const driverRepo = options.driverRepo ?? new InMemoryDriverRepository();
   const assetRepo = options.assetRepo ?? new InMemoryAssetRepository();
+  const assignmentRepo = options.assignmentRepo ?? new InMemoryAssignmentRepository();
   const vehiclePluginClient =
     options.vehiclePluginClient ??
     new VehiclePluginClient({ baseUrl: process.env.VEHICLE_PLUGIN_URL ?? "http://localhost:4700" });
@@ -140,6 +145,40 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     if (!asset) return reply.status(404).send({ error: "not found" });
     const vehicleDetails = asset.type === "vehicle" ? await vehiclePluginClient.getVehicleDetails(id) : null;
     return reply.status(200).send({ ...asset, vehicleDetails });
+  });
+
+  app.post("/assets/:id/assignments", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
+    const parsed = assignDriverInputSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: "invalid assignment payload", details: parsed.error.flatten() });
+    }
+    const asset = await assetRepo.get(id, tenancy.org_id, tenancy.fleet_id);
+    if (!asset) return reply.status(404).send({ error: "asset not found" });
+    const driver = await driverRepo.get(parsed.data.driver_id, tenancy.org_id, tenancy.fleet_id);
+    if (!driver) return reply.status(404).send({ error: "driver not found" });
+
+    const assignment = await assignmentRepo.assign(tenancy.org_id, tenancy.fleet_id, id, parsed.data.driver_id);
+    return reply.status(201).send(assignment);
+  });
+
+  app.delete("/assets/:id/assignments/current", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
+    const closed = await assignmentRepo.unassignCurrent(tenancy.org_id, tenancy.fleet_id, id);
+    if (!closed) return reply.status(404).send({ error: "no open assignment for this asset" });
+    return reply.status(200).send(closed);
+  });
+
+  app.get("/assets/:id/assignments", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
+    const assignments = await assignmentRepo.history(tenancy.org_id, tenancy.fleet_id, id);
+    return reply.status(200).send({ assignments });
   });
 
   return app;

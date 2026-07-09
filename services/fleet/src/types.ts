@@ -77,3 +77,19 @@ export const createVehicleAssetInputSchema = z.object({
   odometerKm: z.number().min(0).default(0),
 });
 export type CreateVehicleAssetInput = z.infer<typeof createVehicleAssetInputSchema>;
+
+export const driverAssignmentSchema = z.object({
+  id: z.string().min(1),
+  org_id: z.string().min(1),
+  fleet_id: z.string().min(1),
+  asset_id: z.string().min(1),
+  driver_id: z.string().min(1),
+  assigned_at: z.string().datetime(),
+  unassigned_at: z.string().datetime().nullable(),
+});
+export type DriverAssignment = z.infer<typeof driverAssignmentSchema>;
+
+export const assignDriverInputSchema = z.object({
+  driver_id: z.string().min(1),
+});
+export type AssignDriverInput = z.infer<typeof assignDriverInputSchema>;

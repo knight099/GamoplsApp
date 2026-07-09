@@ -15,3 +15,8 @@ export { PrismaAssetRepository } from "./prisma-asset-repository.js";
 export { VehiclePluginClient, VehiclePluginClientError } from "./vehicle-plugin-client.js";
 export { assetSchema, createVehicleAssetInputSchema } from "./types.js";
 export type { Asset, CreateVehicleAssetInput } from "./types.js";
+export type { AssignmentRepository } from "./assignment-repository.js";
+export { InMemoryAssignmentRepository } from "./in-memory-assignment-repository.js";
+export { PrismaAssignmentRepository } from "./prisma-assignment-repository.js";
+export { driverAssignmentSchema, assignDriverInputSchema } from "./types.js";
+export type { DriverAssignment, AssignDriverInput } from "./types.js";

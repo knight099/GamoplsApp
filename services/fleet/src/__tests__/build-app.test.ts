@@ -4,6 +4,7 @@ import { buildApp } from "../build-app.js";
 import { InMemoryFleetRepository } from "../in-memory-fleet-repository.js";
 import { InMemoryDriverRepository } from "../in-memory-driver-repository.js";
 import { InMemoryAssetRepository } from "../in-memory-asset-repository.js";
+import { InMemoryAssignmentRepository } from "../in-memory-assignment-repository.js";
 
 class FakeVehiclePluginClient {
   private readonly store = new Map<string, any>();
@@ -27,6 +28,7 @@ describe("fleet app — Fleet REST API", () => {
       fleetRepo: new InMemoryFleetRepository(),
       driverRepo: new InMemoryDriverRepository(),
       assetRepo: new InMemoryAssetRepository(),
+      assignmentRepo: new InMemoryAssignmentRepository(),
       vehiclePluginClient: new FakeVehiclePluginClient() as any,
     });
   });
@@ -120,5 +122,65 @@ describe("fleet app — Fleet REST API", () => {
       payload: { org_id: "org-1", fleet_id: "fleet-1" },
     });
     expect(res.statusCode).toBe(400);
+  });
+
+  it("assigns a driver to a vehicle, reassigns, and tracks history", async () => {
+    const assetRes = await app.inject({
+      method: "POST",
+      url: "/assets",
+      payload: { org_id: "org-1", fleet_id: "fleet-1", plateNumber: "TN-05-EF-1111", vehicleType: "car", fuelType: "petrol" },
+    });
+    const asset = assetRes.json();
+
+    const driverARes = await app.inject({
+      method: "POST",
+      url: "/drivers",
+      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "Driver A" },
+    });
+    const driverA = driverARes.json();
+
+    const driverBRes = await app.inject({
+      method: "POST",
+      url: "/drivers",
+      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "Driver B" },
+    });
+    const driverB = driverBRes.json();
+
+    const assignARes = await app.inject({
+      method: "POST",
+      url: `/assets/${asset.id}/assignments?org_id=org-1&fleet_id=fleet-1`,
+      payload: { driver_id: driverA.id },
+    });
+    expect(assignARes.statusCode).toBe(201);
+    expect(assignARes.json().unassigned_at).toBeNull();
+
+    // Reassigning should close driver A's open assignment.
+    const assignBRes = await app.inject({
+      method: "POST",
+      url: `/assets/${asset.id}/assignments?org_id=org-1&fleet_id=fleet-1`,
+      payload: { driver_id: driverB.id },
+    });
+    expect(assignBRes.statusCode).toBe(201);
+
+    const historyRes = await app.inject({
+      method: "GET",
+      url: `/assets/${asset.id}/assignments?org_id=org-1&fleet_id=fleet-1`,
+    });
+    const history = historyRes.json().assignments;
+    expect(history).toHaveLength(2);
+    expect(history.find((a: any) => a.driver_id === driverA.id).unassigned_at).not.toBeNull();
+    expect(history.find((a: any) => a.driver_id === driverB.id).unassigned_at).toBeNull();
+
+    const unassignRes = await app.inject({
+      method: "DELETE",
+      url: `/assets/${asset.id}/assignments/current?org_id=org-1&fleet_id=fleet-1`,
+    });
+    expect(unassignRes.statusCode).toBe(200);
+
+    const historyAfterRes = await app.inject({
+      method: "GET",
+      url: `/assets/${asset.id}/assignments?org_id=org-1&fleet_id=fleet-1`,
+    });
+    expect(historyAfterRes.json().assignments.every((a: any) => a.unassigned_at !== null)).toBe(true);
   });
 });
