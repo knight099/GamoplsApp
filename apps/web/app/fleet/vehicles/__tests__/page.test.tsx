@@ -21,6 +21,7 @@ describe("VehicleDetailPage", () => {
       health_score: 91,
       telemetry: { fuel_pct: 60, engine_temp_c: 91, battery_pct: 76 },
       telemetry_updated_at: new Date().toISOString(),
+      last_mileage_kmpl: 18.5,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       vehicleDetails: {
@@ -48,11 +49,13 @@ describe("VehicleDetailPage", () => {
         unassigned_at: null,
       },
     ]);
+    vi.mocked(fleetApi.listMaintenanceRecords).mockResolvedValue([]);
 
     render(<VehicleDetailPage />);
 
     await waitFor(() => expect(screen.getByText("TN-01-AB-1234 (van)")).toBeInTheDocument());
     expect(screen.getByText(/12,000 km/)).toBeInTheDocument();
     expect(screen.getByTestId("hotspot-engine")).toBeInTheDocument();
+    expect(screen.getByText(/18.5 km\/L/)).toBeInTheDocument();
   });
 });

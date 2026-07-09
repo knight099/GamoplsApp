@@ -6,6 +6,7 @@ import { Card, Spinner } from "@gamopls/ui";
 import * as fleetApi from "@/components/fleet/api";
 import type { Asset, DriverAssignment } from "@/components/fleet/types";
 import { VehicleDigitalTwin } from "@/components/fleet/VehicleDigitalTwin";
+import { MaintenanceCard } from "@/components/fleet/MaintenanceCard";
 
 export default function VehicleDetailPage() {
   const params = useParams<{ id: string }>();
@@ -72,6 +73,9 @@ export default function VehicleDetailPage() {
             {asset.vehicleDetails.make && <div>Make/Model: {asset.vehicleDetails.make} {asset.vehicleDetails.model}</div>}
           </div>
         )}
+        {typeof asset.last_mileage_kmpl === "number" && (
+          <span className="text-sm text-muted-foreground">Mileage: {asset.last_mileage_kmpl.toFixed(1)} km/L</span>
+        )}
       </Card>
 
       <Card className="border border-border bg-card p-6">
@@ -82,6 +86,8 @@ export default function VehicleDetailPage() {
           <p className="text-sm text-muted-foreground">No driver currently assigned.</p>
         )}
       </Card>
+
+      <MaintenanceCard assetId={asset.id} currentOdometerKm={asset.vehicleDetails?.odometerKm ?? 0} />
     </div>
   );
 }
