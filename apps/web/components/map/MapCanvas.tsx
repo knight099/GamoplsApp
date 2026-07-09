@@ -78,7 +78,7 @@ export function MapCanvas({ markers, geofences }: MapCanvasProps) {
               {marker.odometerKm !== undefined && marker.odometerKm !== null && (
                 <div style={{ fontSize: "0.75rem" }}>Odometer: {marker.odometerKm.toLocaleString()} km</div>
               )}
-              <Link href={`/fleet/vehicles/${marker.id}`} style={{ fontSize: "0.75rem", color: "#22d3ee", display: "inline-block", marginTop: "0.4rem" }}>
+              <Link href={`/fleet/vehicles/${marker.id}`} style={{ fontSize: "0.75rem", color: "var(--primary)", display: "inline-block", marginTop: "0.4rem" }}>
                 More details →
               </Link>
             </div>
@@ -90,7 +90,7 @@ export function MapCanvas({ markers, geofences }: MapCanvasProps) {
           key={geofence.id}
           center={[geofence.centerLat, geofence.centerLng]}
           radius={geofence.radiusMeters}
-          pathOptions={{ color: "#22d3ee", fillOpacity: 0.1 }}
+          pathOptions={{ color: "var(--primary)", fillOpacity: 0.1 }}
         />
       ))}
     </MapContainer>

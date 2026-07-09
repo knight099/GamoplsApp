@@ -91,7 +91,7 @@ export function GeofencePanel({ fleetId, geofences, loading, error, onChanged }:
 
   return (
     <Card className="border border-border bg-card p-6">
-      <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2">Geofence Boundaries</h2>
+      <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border/50 pb-2">Geofence Boundaries</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -176,7 +176,7 @@ export function GeofencePanel({ fleetId, geofences, loading, error, onChanged }:
       ) : (
         <DataTable
           columns={[
-            { key: "name", header: "Name", render: (row: Geofence) => <span className="font-semibold text-white">{row.name}</span> },
+            { key: "name", header: "Name", render: (row: Geofence) => <span className="font-semibold text-foreground">{row.name}</span> },
             { key: "asset", header: "Asset", render: (row: Geofence) => <Badge tone="info">{row.asset_id}</Badge> },
             {
               key: "center",
