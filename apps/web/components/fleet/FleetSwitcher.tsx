@@ -41,7 +41,7 @@ export function FleetSwitcher({ currentFleetId }: FleetSwitcherProps) {
       value={currentFleetId}
       disabled={switching}
       onChange={(e) => void handleChange(e.target.value)}
-      className="h-7 px-2 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-xs font-medium text-cyan-400"
+      className="h-7 px-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary"
     >
       {fleets.map((f) => (
         <option key={f.id} value={f.id}>

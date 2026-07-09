@@ -47,7 +47,7 @@ export function MaintenanceCard({ assetId, currentOdometerKm }: MaintenanceCardP
 
   return (
     <Card className="border border-border bg-card p-6 space-y-4">
-      <h2 className="text-lg font-bold text-white">Maintenance</h2>
+      <h2 className="text-lg font-bold text-foreground">Maintenance</h2>
 
       <div className="flex items-center gap-2">
         <select

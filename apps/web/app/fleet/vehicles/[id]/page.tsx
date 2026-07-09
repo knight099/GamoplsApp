@@ -58,12 +58,12 @@ export default function VehicleDetailPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">{asset.display_label}</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">{asset.display_label}</h1>
         <p className="text-sm text-muted-foreground mt-1">Vehicle detail</p>
       </div>
 
       <Card className="border border-border bg-card p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white">Digital twin</h2>
+        <h2 className="text-lg font-bold text-foreground">Digital twin</h2>
         <VehicleDigitalTwin telemetry={asset.telemetry} healthScore={asset.health_score} />
         {asset.vehicleDetails && (
           <div className="text-sm text-muted-foreground space-y-1">
@@ -79,7 +79,7 @@ export default function VehicleDetailPage() {
       </Card>
 
       <Card className="border border-border bg-card p-6">
-        <h2 className="text-lg font-bold text-white mb-3">Driver assignment</h2>
+        <h2 className="text-lg font-bold text-foreground mb-3">Driver assignment</h2>
         {current ? (
           <p className="text-sm text-foreground">Currently assigned to driver {current.driver_id}</p>
         ) : (

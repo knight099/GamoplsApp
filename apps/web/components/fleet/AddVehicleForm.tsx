@@ -61,8 +61,8 @@ export function AddVehicleForm({ onSubmit }: AddVehicleFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-        <Plus className="h-4 w-4 text-cyan-400" />
+      <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5">
+        <Plus className="h-4 w-4 text-primary" />
         Add vehicle
       </h3>
       <div className="space-y-1">
@@ -111,7 +111,7 @@ export function AddVehicleForm({ onSubmit }: AddVehicleFormProps) {
       <button
         type="button"
         onClick={() => setShowMore((v) => !v)}
-        className="text-xs font-semibold text-cyan-400 hover:underline"
+        className="text-xs font-semibold text-primary hover:underline"
       >
         {showMore ? "Hide more details" : "More details (optional)"}
       </button>
