@@ -58,8 +58,8 @@ export function UploadForm({ uploaderId, onUploaded }: UploadFormProps) {
 
   return (
     <Card className="border border-border bg-card p-6">
-      <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2 flex items-center gap-1.5">
-        <UploadCloud className="h-5 w-5 text-cyan-400" />
+      <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border/50 pb-2 flex items-center gap-1.5">
+        <UploadCloud className="h-5 w-5 text-primary" />
         Upload document
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -79,9 +79,9 @@ export function UploadForm({ uploaderId, onUploaded }: UploadFormProps) {
             />
             <div className="space-y-2">
               <div className="flex justify-center text-muted-foreground/80">
-                <FileIcon className="h-8 w-8 text-cyan-400/80" />
+                <FileIcon className="h-8 w-8 text-primary/80" />
               </div>
-              <p className="text-xs font-semibold text-white">
+              <p className="text-xs font-semibold text-foreground">
                 {file ? file.name : "Select or drag file here"}
               </p>
               <p className="text-[10px] text-muted-foreground/80">
@@ -128,7 +128,7 @@ export function UploadForm({ uploaderId, onUploaded }: UploadFormProps) {
         </div>
 
         {error && (
-          <p role="alert" style={{ color: "#ef4444", fontSize: "0.875rem", margin: 0 }}>
+          <p role="alert" className="text-sm text-rose-400">
             {error}
           </p>
         )}
