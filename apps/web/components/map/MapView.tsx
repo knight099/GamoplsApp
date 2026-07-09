@@ -1,12 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Badge, Card, Spinner } from "@gamopls/ui";
 import { fetchFleetPositions, listGeofences, MapApiError } from "./api";
 import { AssetPositionsTable } from "./AssetPositionsTable";
 import { GeofencePanel } from "./GeofencePanel";
 import type { AssetMarker, Geofence } from "./types";
+import { listVehicles } from "@/components/fleet/api";
+import type { Asset } from "@/components/fleet/types";
+import type { MapMarkerData } from "./MapCanvas";
 import { RefreshCw } from "lucide-react";
+
+const MapCanvas = dynamic(() => import("./MapCanvas").then((m) => m.MapCanvas), { ssr: false });
 
 export interface MapViewProps {
   fleetId: string;
@@ -23,6 +29,8 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
   const [geofences, setGeofences] = useState<Geofence[]>([]);
   const [geofencesLoading, setGeofencesLoading] = useState(true);
   const [geofencesError, setGeofencesError] = useState<string | null>(null);
+
+  const [vehicleAssets, setVehicleAssets] = useState<Asset[]>([]);
 
   const isFirstPositionsLoad = useRef(true);
 
@@ -64,6 +72,38 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
     void loadGeofences();
   }, [loadGeofences]);
 
+  const loadVehicleAssets = useCallback(async () => {
+    try {
+      const data = await listVehicles();
+      setVehicleAssets(data);
+    } catch {
+      // Non-fatal: markers just render without health/fuel/odometer if this fails.
+      setVehicleAssets([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadVehicleAssets();
+  }, [loadVehicleAssets]);
+
+  const assetsById = new Map(vehicleAssets.map((a) => [a.id, a]));
+  const markers: MapMarkerData[] = positions.map((p) => {
+    const asset = assetsById.get(p.id);
+    return {
+      id: p.id,
+      icon: p.icon,
+      label: p.label,
+      lat: p.lat,
+      lng: p.lng,
+      heading: p.heading,
+      speed: p.speed,
+      positionUpdatedAt: p.positionUpdatedAt,
+      healthScore: asset?.health_score,
+      fuelPct: typeof asset?.telemetry.fuel_pct === "number" ? asset.telemetry.fuel_pct : null,
+      odometerKm: asset?.vehicleDetails?.odometerKm ?? null,
+    };
+  });
+
   return (
     <div className="grid gap-6">
       <Card className="border border-border bg-card/40 p-6 backdrop-blur-sm">
@@ -98,6 +138,10 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
         <p className="text-xs text-muted-foreground leading-relaxed">
           *Note: This dashboard delivers telemetry summaries, state feeds, and geo boundary breaches. Consult pilot specifications for V1 coverage boundaries.
         </p>
+      </Card>
+
+      <Card className="border border-border bg-card p-4">
+        <MapCanvas markers={markers} geofences={geofences} />
       </Card>
 
       <Card className="border border-border bg-card p-6">
