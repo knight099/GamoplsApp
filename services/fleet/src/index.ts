@@ -20,3 +20,7 @@ export { InMemoryAssignmentRepository } from "./in-memory-assignment-repository.
 export { PrismaAssignmentRepository } from "./prisma-assignment-repository.js";
 export { driverAssignmentSchema, assignDriverInputSchema } from "./types.js";
 export type { DriverAssignment, AssignDriverInput } from "./types.js";
+export type { MaintenanceSuggestionRepository, MaintenanceSuggestion } from "./maintenance-suggestion-repository.js";
+export { InMemoryMaintenanceSuggestionRepository } from "./in-memory-maintenance-suggestion-repository.js";
+export { PrismaMaintenanceSuggestionRepository } from "./prisma-maintenance-suggestion-repository.js";
+export { SERVICE_INTERVALS_KM } from "./service-intervals.js";

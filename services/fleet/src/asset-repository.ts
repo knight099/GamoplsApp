@@ -13,4 +13,5 @@ export interface AssetRepository {
   list(org_id: string, fleet_id: string): Promise<Asset[]>;
   delete(id: string): Promise<void>;
   updateHealth(id: string, health_score: number, telemetry: Record<string, unknown>): Promise<void>;
+  updateMileage(id: string, last_mileage_kmpl: number | null): Promise<void>;
 }

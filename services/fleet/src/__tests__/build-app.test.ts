@@ -9,6 +9,7 @@ import { VehiclePluginClientError } from "../vehicle-plugin-client.js";
 
 class FakeVehiclePluginClient {
   private readonly store = new Map<string, any>();
+  private readonly maintenanceRecords: any[] = [];
 
   async createVehicleDetails(input: any) {
     const record = { ...input };
@@ -18,6 +19,23 @@ class FakeVehiclePluginClient {
 
   async getVehicleDetails(assetId: string) {
     return this.store.get(assetId) ?? null;
+  }
+
+  async createMaintenanceRecord(input: any) {
+    const record = {
+      id: `rec-${this.maintenanceRecords.length + 1}`,
+      assetId: input.assetId,
+      serviceType: input.serviceType,
+      performedAt: input.performedAt,
+      odometerAtServiceKm: input.odometerAtServiceKm,
+      createdAt: new Date().toISOString(),
+    };
+    this.maintenanceRecords.push(record);
+    return record;
+  }
+
+  async getMaintenanceRecords(assetId: string) {
+    return this.maintenanceRecords.filter((r) => r.assetId === assetId);
   }
 }
 
@@ -237,5 +255,55 @@ describe("fleet app — Fleet REST API", () => {
       url: `/assets/${asset.id}/assignments?org_id=org-1&fleet_id=fleet-1`,
     });
     expect(historyAfterRes.json().assignments.every((a: any) => a.unassigned_at !== null)).toBe(true);
+  });
+
+  it("creates then lists maintenance records for an asset, proxied through the vehicle plugin", async () => {
+    const assetRes = await app.inject({
+      method: "POST",
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
+      payload: { plateNumber: "TN-08-GH-2222", vehicleType: "truck", fuelType: "diesel" },
+    });
+    const asset = assetRes.json();
+
+    const createRes = await app.inject({
+      method: "POST",
+      url: `/assets/${asset.id}/maintenance-records?org_id=org-1&fleet_id=fleet-1`,
+      payload: { serviceType: "oil_change", performedAt: "2026-06-01T00:00:00.000Z", odometerAtServiceKm: 12000 },
+    });
+    expect(createRes.statusCode).toBe(201);
+    expect(createRes.json().serviceType).toBe("oil_change");
+
+    const listRes = await app.inject({
+      method: "GET",
+      url: `/assets/${asset.id}/maintenance-records?org_id=org-1&fleet_id=fleet-1`,
+    });
+    expect(listRes.statusCode).toBe(200);
+    expect(listRes.json().records).toHaveLength(1);
+    expect(listRes.json().records[0].odometerAtServiceKm).toBe(12000);
+  });
+
+  it("rejects a maintenance record create for an unknown asset", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/assets/does-not-exist/maintenance-records?org_id=org-1&fleet_id=fleet-1",
+      payload: { serviceType: "oil_change", performedAt: "2026-06-01T00:00:00.000Z", odometerAtServiceKm: 12000 },
+    });
+    expect(res.statusCode).toBe(404);
+  });
+
+  it("rejects a maintenance record create with a missing field", async () => {
+    const assetRes = await app.inject({
+      method: "POST",
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
+      payload: { plateNumber: "TN-08-GH-3333", vehicleType: "truck", fuelType: "diesel" },
+    });
+    const asset = assetRes.json();
+
+    const res = await app.inject({
+      method: "POST",
+      url: `/assets/${asset.id}/maintenance-records?org_id=org-1&fleet_id=fleet-1`,
+      payload: { serviceType: "oil_change" },
+    });
+    expect(res.statusCode).toBe(400);
   });
 });

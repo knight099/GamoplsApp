@@ -16,6 +16,7 @@ export class InMemoryAssetRepository implements AssetRepository {
       health_score: 100,
       telemetry: {},
       telemetry_updated_at: null,
+      last_mileage_kmpl: null,
       created_at: now,
       updated_at: now,
     };
@@ -43,5 +44,11 @@ export class InMemoryAssetRepository implements AssetRepository {
     asset.telemetry = telemetry;
     asset.telemetry_updated_at = new Date().toISOString();
     asset.updated_at = asset.telemetry_updated_at;
+  }
+
+  async updateMileage(id: string, last_mileage_kmpl: number | null): Promise<void> {
+    const asset = this.rows.find((a) => a.id === id);
+    if (!asset) return;
+    asset.last_mileage_kmpl = last_mileage_kmpl;
   }
 }

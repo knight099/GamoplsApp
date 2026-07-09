@@ -189,5 +189,43 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     return reply.status(200).send({ assignments });
   });
 
+  app.post("/assets/:id/maintenance-records", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
+    const asset = await assetRepo.get(id, tenancy.org_id, tenancy.fleet_id);
+    if (!asset) return reply.status(404).send({ error: "asset not found" });
+
+    const body = request.body as { serviceType?: string; performedAt?: string; odometerAtServiceKm?: number };
+    if (!body.serviceType || !body.performedAt || typeof body.odometerAtServiceKm !== "number") {
+      return reply.status(400).send({ error: "serviceType, performedAt, and odometerAtServiceKm are required" });
+    }
+
+    try {
+      const record = await vehiclePluginClient.createMaintenanceRecord({
+        assetId: id,
+        serviceType: body.serviceType,
+        performedAt: body.performedAt,
+        odometerAtServiceKm: body.odometerAtServiceKm,
+      });
+      return reply.status(201).send(record);
+    } catch (err) {
+      if (err instanceof VehiclePluginClientError) {
+        return reply.status(502).send({ error: "failed to create maintenance record", detail: err.message });
+      }
+      throw err;
+    }
+  });
+
+  app.get("/assets/:id/maintenance-records", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
+    const asset = await assetRepo.get(id, tenancy.org_id, tenancy.fleet_id);
+    if (!asset) return reply.status(404).send({ error: "asset not found" });
+    const records = await vehiclePluginClient.getMaintenanceRecords(id);
+    return reply.status(200).send({ records });
+  });
+
   return app;
 }

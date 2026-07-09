@@ -17,6 +17,15 @@ export interface VehicleDetailsResponse {
   odometerKm: number;
 }
 
+export interface MaintenanceRecordResponse {
+  id: string;
+  assetId: string;
+  serviceType: string;
+  performedAt: string;
+  odometerAtServiceKm: number;
+  createdAt: string;
+}
+
 export class VehiclePluginClientError extends Error {
   constructor(
     message: string,
@@ -72,5 +81,31 @@ export class VehiclePluginClient {
       throw new VehiclePluginClientError(`vehicle-plugin get failed: ${res.status}`, res.status);
     }
     return (await res.json()) as VehicleDetailsResponse;
+  }
+
+  async createMaintenanceRecord(input: {
+    assetId: string;
+    serviceType: string;
+    performedAt: string;
+    odometerAtServiceKm: number;
+  }): Promise<MaintenanceRecordResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/maintenance-records`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      throw new VehiclePluginClientError(`vehicle-plugin maintenance create failed: ${res.status}`, res.status);
+    }
+    return (await res.json()) as MaintenanceRecordResponse;
+  }
+
+  async getMaintenanceRecords(assetId: string): Promise<MaintenanceRecordResponse[]> {
+    const res = await this.fetchImpl(`${this.baseUrl}/maintenance-records/${assetId}`);
+    if (!res.ok) {
+      throw new VehiclePluginClientError(`vehicle-plugin maintenance list failed: ${res.status}`, res.status);
+    }
+    const body = (await res.json()) as { records: MaintenanceRecordResponse[] };
+    return body.records;
   }
 }
