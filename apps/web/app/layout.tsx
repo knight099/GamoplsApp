@@ -4,7 +4,8 @@ import { getSession } from "@/lib/session";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Globe, MessageSquare, ClipboardList, Files, Zap, LogOut } from "lucide-react";
+import { Globe, MessageSquare, ClipboardList, Files, Truck, Zap, LogOut } from "lucide-react";
+import { FleetSwitcher } from "@/components/fleet/FleetSwitcher";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -14,6 +15,7 @@ export const metadata = {
 };
 
 const NAV_LINKS = [
+  { href: "/fleet", label: "Fleet", icon: Truck },
   { href: "/map", label: "Map", icon: Globe },
   { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/board", label: "Board", icon: ClipboardList },
@@ -83,7 +85,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 {session && (
                   <div className="flex gap-2">
                     <span className="inline-flex items-center rounded-full bg-blue-400/10 px-2.5 py-0.5 text-xs font-medium text-blue-400 border border-blue-400/20">org: {session.org_id}</span>
-                    <span className="inline-flex items-center rounded-full bg-cyan-400/10 px-2.5 py-0.5 text-xs font-medium text-cyan-400 border border-cyan-400/20">fleet: {session.fleet_id}</span>
+                    <FleetSwitcher currentFleetId={session.fleet_id} />
                   </div>
                 )}
               </div>
