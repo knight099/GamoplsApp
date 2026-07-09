@@ -46,3 +46,34 @@ export const updateDriverInputSchema = z.object({
   status: driverStatusSchema.optional(),
 });
 export type UpdateDriverInput = z.infer<typeof updateDriverInputSchema>;
+
+export const assetSchema = z.object({
+  id: z.string().min(1),
+  org_id: z.string().min(1),
+  fleet_id: z.string().min(1),
+  type: z.string().min(1),
+  display_label: z.string().min(1),
+  health_score: z.number().min(0).max(100),
+  telemetry: z.record(z.string(), z.unknown()),
+  telemetry_updated_at: z.string().datetime().nullable(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+});
+export type Asset = z.infer<typeof assetSchema>;
+
+/** Vehicle-specific fields, entered once at onboarding, forwarded to plugins/asset-vehicle — never stored here. */
+export const createVehicleAssetInputSchema = z.object({
+  org_id: z.string().min(1),
+  fleet_id: z.string().min(1),
+  plateNumber: z.string().min(1),
+  vehicleType: z.enum(["truck", "van", "car", "bike", "bus", "other"]),
+  fuelType: z.enum(["petrol", "diesel", "electric", "hybrid", "cng"]),
+  make: z.string().min(1).nullable().default(null),
+  model: z.string().min(1).nullable().default(null),
+  color: z.string().min(1).nullable().default(null),
+  year: z.string().min(1).nullable().default(null),
+  vin: z.string().min(1).nullable().default(null),
+  fuelCapacityLiters: z.number().positive().nullable().default(null),
+  odometerKm: z.number().min(0).default(0),
+});
+export type CreateVehicleAssetInput = z.infer<typeof createVehicleAssetInputSchema>;
