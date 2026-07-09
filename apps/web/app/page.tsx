@@ -48,12 +48,12 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 opacity-30 pointer-events-none" />
         
         <div className="relative z-10 space-y-6">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400 border border-cyan-400/20">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary border border-primary/20">
             <ShieldCheck className="h-3.5 w-3.5" />
             Active Fleet Operation Shield
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
             Human-Machine Fleet <br className="hidden md:inline" />
             Control Cockpit
           </h1>
@@ -83,7 +83,7 @@ export default async function HomePage() {
       {/* Grid Modules */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Operational Modules</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Operational Modules</h2>
           <p className="text-sm text-muted-foreground mt-1">Select an index below to manage telemetry and task workflows.</p>
         </div>
         
@@ -102,7 +102,7 @@ export default async function HomePage() {
                         {mod.badgeText}
                       </span>
                     </div>
-                    <CardTitle className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                    <CardTitle className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                       {mod.title}
                     </CardTitle>
                   </CardHeader>
@@ -110,7 +110,7 @@ export default async function HomePage() {
                     <CardDescription className="text-sm font-medium text-muted-foreground leading-relaxed">
                       {mod.desc}
                     </CardDescription>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 mt-6 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-primary mt-6 opacity-80 group-hover:opacity-100 transition-opacity">
                       Open Module
                       <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
                     </div>
