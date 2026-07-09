@@ -1,9 +1,20 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 import { MapView } from "../MapView";
 
+vi.mock("../MapCanvas", () => ({
+  MapCanvas: ({ markers }: { markers: { label: string }[] }) => (
+    <div data-testid="map-canvas">{markers.map((m) => m.label).join(",")}</div>
+  ),
+}));
+vi.mock("@/components/fleet/api", () => ({
+  listVehicles: vi.fn(async () => []),
+}));
+
 afterEach(() => {
+  cleanup();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -43,7 +54,7 @@ describe("MapView", () => {
 
     expect(screen.getByText("Map")).toBeDefined();
 
-    await waitFor(() => expect(screen.getByText("Truck 42")).toBeDefined());
+    await waitFor(() => expect(screen.getAllByText("Truck 42").length).toBeGreaterThan(0));
     expect(screen.getByText("generic-asset-marker")).toBeDefined();
     expect(screen.getByText("No geofences defined for this fleet yet.")).toBeDefined();
 
@@ -86,5 +97,26 @@ describe("MapView", () => {
     await waitFor(() =>
       expect(screen.getByText("No assets reporting a position for this fleet yet.")).toBeDefined(),
     );
+  });
+
+  it("renders the map canvas above the positions table", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes("/positions")) {
+        return jsonResponse({
+          fleet_id: "fleet-1",
+          positions: [
+            { id: "asset-1", org_id: "org-1", fleet_id: "fleet-1", icon: "generic-asset-marker", label: "Truck 42", lat: 13.08, lng: 80.27, positionUpdatedAt: "2026-07-08T10:00:00.000Z" },
+          ],
+        });
+      }
+      if (url.includes("/geofences")) return jsonResponse({ geofences: [] });
+      throw new Error(`unexpected url ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MapView fleetId="fleet-1" pollIntervalMs={100000} />);
+
+    await waitFor(() => expect(screen.getByTestId("map-canvas")).toBeInTheDocument());
+    expect(screen.getByTestId("map-canvas")).toHaveTextContent("Truck 42");
   });
 });

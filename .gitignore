@@ -44,3 +44,9 @@ services/ai-engine/.pytest_cache/
 
 # Misc
 *.pid
+
+# superpowers brainstorming scratch
+.superpowers/
+
+# agent worktrees
+.claude/

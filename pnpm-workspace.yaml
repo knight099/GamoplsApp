@@ -5,6 +5,7 @@ packages:
   - services/board
   - services/hub
   - services/registry
+  - services/fleet
   - packages/*
   - plugins/*
 

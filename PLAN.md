@@ -148,6 +148,24 @@ Each service is its own sub-problem and can be built in parallel by different pe
 
 ---
 
+## Phase 8 — Fleet operations UX (post-V1, in progress)
+
+Goal: make the platform usable by a non-technical fleet operator day-to-day — onboarding vehicles/drivers, seeing them on a real map, and eventually turning raw telemetry into money saved (maintenance timing, fuel efficiency, idle time). Decomposed into four sub-projects, each with its own spec → plan → implementation cycle rather than one giant design (per `superpowers:brainstorming`'s decomposition rule) — see `docs/superpowers/specs/` and `docs/superpowers/plans/`.
+
+- [ ] 8.0 UI/UX restyle — two-theme (light "Clarity" / dark "Neutral") token-based color system across `apps/web`, replacing the ad-hoc hardcoded Tailwind color classes from the earlier dashboard pass. Spec: `docs/superpowers/specs/2026-07-09-ui-ux-restyle-design.md`.
+- [ ] 8.A Fleet, vehicle & driver management — new `services/fleet` owning `Fleet`/`Driver`/base `Asset` registry/`DriverAssignment` history (full history, not just current-driver pointer); `plugins/asset-vehicle` gains an HTTP API so `services/fleet` reaches it only over the network, never by import. Vehicle onboarding is a single flat form (plate + type + fuel required, everything else collapsed under "more details"), pattern adapted from a sibling app's vehicle-form UX. Spec: `docs/superpowers/specs/2026-07-09-fleet-vehicle-driver-management-design.md`. Plan: `docs/superpowers/plans/2026-07-09-fleet-vehicle-driver-management.md`.
+- [ ] 8.B Interactive map with clickable markers — `MapView` today is a live-updating table, not a visual map; needs a mapping library decision (Leaflet/Mapbox/etc.) plus a marker-click popup showing fuel/odometer/health score at a glance. Depends on 8.A for real vehicle data to render. Not yet spec'd.
+- [ ] 8.C Advanced vehicle dashboard ("digital twin") — deeper drill-down from a marker click: a schematic/diagram view with health condition marked per component/position, not just numeric gauges. Depends on 8.A (data) and 8.B (entry point). Not yet spec'd.
+- [ ] 8.D Maintenance & fleet optimization — the actual money-saving layer for operators (Delhivery/cab/courier-style fleets):
+  - **Multi-sensor plugin extensibility**: additional Ingestion Plugins (camera, dashcam, independent GPS/mileage trackers) alongside `plugins/ingestion-edgebox`, each publishing into the same `AssetHealthChanged`/`AssetLocationUpdated` event shapes. No module service changes needed — `Monitorable.telemetry` is already an opaque bag for exactly this reason (`packages/asset-contracts/src/monitorable.ts`).
+  - **Service-due-by-mileage**: `MaintenanceRecord` (what part, when, at what odometer) + `ServiceSchedule` (e.g. every 10,000 km), compared against live `odometer_km` telemetry → raises `TaskSuggested` (event already exists) → `services/board` auto-creates a draft task, mirroring the existing AI health-score-threshold flow.
+  - **Fuel efficiency (km/l) + idle-time detection**: computed from deltas between successive `AssetHealthChanged` readings (odometer change ÷ fuel consumed; `speed_kmh ≈ 0` sustained = idle). Natural home is `services/ai-engine` (Phase 5) as a sibling job to the existing health-score computation.
+  - Depends on 8.A (needs `Asset`/telemetry persistence to exist) and real ingested telemetry to validate calculations against — not yet spec'd; brainstorm after 8.A is implemented and flowing real data.
+
+**Acceptance per sub-project:** each ships independently — 8.A doesn't block on 8.B/8.C/8.D being designed, and each gets its own working, testable slice per its plan's task list.
+
+---
+
 ## Suggested build order
 
-Phase 0 → 1 → 2 → 3 are sequential (each is a real dependency of the next). Phase 4's four services can run in parallel once 1–3 are done. Phase 5 can start in parallel with Phase 4 (only needs event schemas). Phase 6 needs at least one of Phase 4's services to have a real API to point at — start with `map` since it's the most demo-able. Phase 7 is continuous, not a final step — 7.2's CI guard should land as soon as Phase 4 starts, not after.
+Phase 0 → 1 → 2 → 3 are sequential (each is a real dependency of the next). Phase 4's four services can run in parallel once 1–3 are done. Phase 5 can start in parallel with Phase 4 (only needs event schemas). Phase 6 needs at least one of Phase 4's services to have a real API to point at — start with `map` since it's the most demo-able. Phase 7 is continuous, not a final step — 7.2's CI guard should land as soon as Phase 4 starts, not after. Phase 8 starts once Phase 6 (dashboard) is live; 8.A is the current focus, 8.B/8.C/8.D queue behind it in order since each depends on the previous sub-project's data or entry point existing.
