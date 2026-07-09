@@ -31,9 +31,11 @@ export class InMemoryDriverRepository implements DriverRepository {
   }
 
   async update(id: string, org_id: string, fleet_id: string, patch: UpdateDriverInput): Promise<Driver | null> {
-    const idx = this.rows.findIndex((d) => d.id === id && d.org_id === org_id && d.fleet_id === fleet_id);
-    if (idx === -1) return null;
-    this.rows[idx] = { ...this.rows[idx], ...patch, updated_at: new Date().toISOString() };
-    return this.rows[idx];
+    const existing = this.rows.find((d) => d.id === id && d.org_id === org_id && d.fleet_id === fleet_id);
+    if (!existing) return null;
+    const updated: Driver = { ...existing, ...patch, updated_at: new Date().toISOString() };
+    const idx = this.rows.indexOf(existing);
+    this.rows[idx] = updated;
+    return updated;
   }
 }
