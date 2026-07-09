@@ -24,7 +24,9 @@
   },
   "dependencies": {
     "@gamopls/asset-contracts": "workspace:*",
-    "@gamopls/event-schemas": "workspace:*"
+    "@gamopls/db": "workspace:*",
+    "@gamopls/event-schemas": "workspace:*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@gamopls/config": "workspace:*",

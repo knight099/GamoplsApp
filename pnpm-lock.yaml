@@ -280,9 +280,15 @@ importers:
       '@gamopls/asset-contracts':
         specifier: workspace:*
         version: link:../../packages/asset-contracts
+      '@gamopls/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@gamopls/event-schemas':
         specifier: workspace:*
         version: link:../../packages/event-schemas
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@gamopls/config':
         specifier: workspace:*
