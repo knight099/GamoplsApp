@@ -15,7 +15,8 @@
     "MAP_SERVICE_URL",
     "CHAT_SERVICE_URL",
     "BOARD_SERVICE_URL",
-    "HUB_SERVICE_URL"
+    "HUB_SERVICE_URL",
+    "FLEET_SERVICE_URL"
   ],
   "tasks": {
     "build": {
