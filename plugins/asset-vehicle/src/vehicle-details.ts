@@ -27,6 +27,9 @@ export interface VehicleDetails {
   vehicleType: "truck" | "van" | "car" | "bike" | "bus" | "other";
   make: string | null;
   model: string | null;
+  color: string | null;
+  year: string | null;
+  vin: string | null;
   fuelType: FuelType;
   fuelCapacityLiters: number | null;
   odometerKm: number;
