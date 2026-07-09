@@ -53,7 +53,8 @@ function markerIcon(score: number | undefined): L.DivIcon {
 const DEFAULT_CENTER: [number, number] = [13.0827, 80.2707]; // Chennai — matches the pilot fleet's home region
 
 export function MapCanvas({ markers, geofences }: MapCanvasProps) {
-  const center: [number, number] = markers.length > 0 ? [markers[0].lat, markers[0].lng] : DEFAULT_CENTER;
+  const firstMarker = markers[0];
+  const center: [number, number] = firstMarker ? [firstMarker.lat, firstMarker.lng] : DEFAULT_CENTER;
 
   return (
     <MapContainer center={center} zoom={12} style={{ height: "480px", width: "100%", borderRadius: "0.75rem" }}>
