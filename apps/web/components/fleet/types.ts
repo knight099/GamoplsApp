@@ -41,9 +41,25 @@ export interface Asset {
   health_score: number;
   telemetry: Record<string, unknown>;
   telemetry_updated_at: string | null;
+  last_mileage_kmpl: number | null;
   created_at: string;
   updated_at: string;
   vehicleDetails?: VehicleDetails | null;
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  assetId: string;
+  serviceType: "oil_change" | "brake_inspection" | "tire_rotation" | "general_service";
+  performedAt: string;
+  odometerAtServiceKm: number;
+  createdAt: string;
+}
+
+export interface LogMaintenanceInput {
+  serviceType: MaintenanceRecord["serviceType"];
+  performedAt: string;
+  odometerAtServiceKm: number;
 }
 
 export interface DriverAssignment {

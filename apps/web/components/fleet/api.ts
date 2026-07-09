@@ -5,6 +5,8 @@ import type {
   Driver,
   DriverAssignment,
   Fleet,
+  LogMaintenanceInput,
+  MaintenanceRecord,
 } from "./types";
 
 export class FleetApiError extends Error {
@@ -108,4 +110,19 @@ export async function listAssignmentHistory(assetId: string): Promise<DriverAssi
   const res = await fetch(`/api/fleet/assets/${assetId}/assignments`);
   const data = await parseOrThrow<{ assignments: DriverAssignment[] }>(res);
   return data.assignments;
+}
+
+export async function listMaintenanceRecords(assetId: string): Promise<MaintenanceRecord[]> {
+  const res = await fetch(`/api/fleet/assets/${assetId}/maintenance-records`);
+  const data = await parseOrThrow<{ records: MaintenanceRecord[] }>(res);
+  return data.records;
+}
+
+export async function logMaintenance(assetId: string, input: LogMaintenanceInput): Promise<MaintenanceRecord> {
+  const res = await fetch(`/api/fleet/assets/${assetId}/maintenance-records`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  return parseOrThrow<MaintenanceRecord>(res);
 }
