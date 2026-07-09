@@ -6,10 +6,12 @@ in-process code across languages. Field names and JSON shapes here MUST stay
 in lockstep with `packages/event-schemas/src/events/*.ts` by hand — if you
 change a field here, check the TS schema (and vice versa).
 
-Source of truth checked against (2026-07-08):
+Source of truth checked against (2026-07-10):
   packages/event-schemas/src/common.ts
   packages/event-schemas/src/events/asset-health-changed.ts
   packages/event-schemas/src/events/task-suggested.ts
+  packages/event-schemas/src/events/asset-location-updated.ts
+  packages/event-schemas/src/events/alert-raised.ts
 """
 
 from __future__ import annotations

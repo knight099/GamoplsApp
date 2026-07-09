@@ -98,3 +98,10 @@ export const assignDriverInputSchema = z.object({
   driver_id: z.string().min(1),
 });
 export type AssignDriverInput = z.infer<typeof assignDriverInputSchema>;
+
+export const logMaintenanceInputSchema = z.object({
+  serviceType: z.enum(["oil_change", "brake_inspection", "tire_rotation", "general_service"]),
+  performedAt: z.string().datetime(),
+  odometerAtServiceKm: z.number().min(0),
+});
+export type LogMaintenanceInput = z.infer<typeof logMaintenanceInputSchema>;

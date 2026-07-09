@@ -14,6 +14,7 @@ import {
   createDriverInputSchema,
   updateDriverInputSchema,
   createVehicleAssetInputSchema,
+  logMaintenanceInputSchema,
   assignDriverInputSchema,
 } from "./types.js";
 
@@ -196,17 +197,17 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     const asset = await assetRepo.get(id, tenancy.org_id, tenancy.fleet_id);
     if (!asset) return reply.status(404).send({ error: "asset not found" });
 
-    const body = request.body as { serviceType?: string; performedAt?: string; odometerAtServiceKm?: number };
-    if (!body.serviceType || !body.performedAt || typeof body.odometerAtServiceKm !== "number") {
-      return reply.status(400).send({ error: "serviceType, performedAt, and odometerAtServiceKm are required" });
+    const parsed = logMaintenanceInputSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: "invalid maintenance record payload", details: parsed.error.flatten() });
     }
 
     try {
       const record = await vehiclePluginClient.createMaintenanceRecord({
         assetId: id,
-        serviceType: body.serviceType,
-        performedAt: body.performedAt,
-        odometerAtServiceKm: body.odometerAtServiceKm,
+        serviceType: parsed.data.serviceType,
+        performedAt: parsed.data.performedAt,
+        odometerAtServiceKm: parsed.data.odometerAtServiceKm,
       });
       return reply.status(201).send(record);
     } catch (err) {
