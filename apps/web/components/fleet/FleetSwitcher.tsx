@@ -19,12 +19,16 @@ export function FleetSwitcher({ currentFleetId }: FleetSwitcherProps) {
   async function handleChange(fleetId: string) {
     if (fleetId === currentFleetId) return;
     setSwitching(true);
-    await fetch("/api/switch-fleet", {
+    const response = await fetch("/api/switch-fleet", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ fleet_id: fleetId }),
     });
-    window.location.reload();
+    if (response.ok) {
+      window.location.reload();
+      return;
+    }
+    setSwitching(false);
   }
 
   if (fleets.length === 0) {

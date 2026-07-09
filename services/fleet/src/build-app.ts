@@ -38,11 +38,15 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   app.get("/health", async () => ({ status: "ok" }));
 
   app.post("/fleets", async (request, reply) => {
+    const query = request.query as Record<string, unknown>;
+    if (typeof query.org_id !== "string" || query.org_id.length === 0) {
+      return reply.status(400).send({ error: "org_id query param is required" });
+    }
     const parsed = createFleetInputSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(400).send({ error: "invalid fleet payload", details: parsed.error.flatten() });
     }
-    const fleet = await fleetRepo.create(parsed.data);
+    const fleet = await fleetRepo.create({ org_id: query.org_id, ...parsed.data });
     return reply.status(201).send(fleet);
   });
 
@@ -64,11 +68,13 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   }
 
   app.post("/drivers", async (request, reply) => {
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
     const parsed = createDriverInputSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(400).send({ error: "invalid driver payload", details: parsed.error.flatten() });
     }
-    const driver = await driverRepo.create(parsed.data);
+    const driver = await driverRepo.create({ org_id: tenancy.org_id, fleet_id: tenancy.fleet_id, ...parsed.data });
     return reply.status(201).send(driver);
   });
 
@@ -93,14 +99,16 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   });
 
   app.post("/assets", async (request, reply) => {
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
     const parsed = createVehicleAssetInputSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(400).send({ error: "invalid asset payload", details: parsed.error.flatten() });
     }
     const input = parsed.data;
     const asset = await assetRepo.create({
-      org_id: input.org_id,
-      fleet_id: input.fleet_id,
+      org_id: tenancy.org_id,
+      fleet_id: tenancy.fleet_id,
       type: "vehicle",
       display_label: `${input.plateNumber} (${input.vehicleType})`,
     });

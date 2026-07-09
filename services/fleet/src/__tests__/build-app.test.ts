@@ -5,6 +5,7 @@ import { InMemoryFleetRepository } from "../in-memory-fleet-repository.js";
 import { InMemoryDriverRepository } from "../in-memory-driver-repository.js";
 import { InMemoryAssetRepository } from "../in-memory-asset-repository.js";
 import { InMemoryAssignmentRepository } from "../in-memory-assignment-repository.js";
+import { VehiclePluginClientError } from "../vehicle-plugin-client.js";
 
 class FakeVehiclePluginClient {
   private readonly store = new Map<string, any>();
@@ -42,8 +43,8 @@ describe("fleet app — Fleet REST API", () => {
   it("creates then lists fleets, tenant-scoped by org_id", async () => {
     const createRes = await app.inject({
       method: "POST",
-      url: "/fleets",
-      payload: { org_id: "org-1", name: "Chennai Pilot Fleet" },
+      url: "/fleets?org_id=org-1",
+      payload: { name: "Chennai Pilot Fleet" },
     });
     expect(createRes.statusCode).toBe(201);
 
@@ -54,16 +55,31 @@ describe("fleet app — Fleet REST API", () => {
     expect(otherOrgRes.json().fleets).toHaveLength(0);
   });
 
+  it("creates a fleet using only the gateway-injected org_id query param, with no org_id in the body", async () => {
+    const createRes = await app.inject({
+      method: "POST",
+      url: "/fleets?org_id=org-1",
+      payload: { name: "Query-Only Fleet" },
+    });
+    expect(createRes.statusCode).toBe(201);
+    expect(createRes.json().org_id).toBe("org-1");
+  });
+
   it("rejects fleet creation with an empty name", async () => {
-    const res = await app.inject({ method: "POST", url: "/fleets", payload: { org_id: "org-1", name: "" } });
+    const res = await app.inject({ method: "POST", url: "/fleets?org_id=org-1", payload: { name: "" } });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects fleet creation without an org_id query param", async () => {
+    const res = await app.inject({ method: "POST", url: "/fleets", payload: { name: "No Org" } });
     expect(res.statusCode).toBe(400);
   });
 
   it("creates, lists, and updates a driver", async () => {
     const createRes = await app.inject({
       method: "POST",
-      url: "/drivers",
-      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "Kumar S" },
+      url: "/drivers?org_id=org-1&fleet_id=fleet-1",
+      payload: { name: "Kumar S" },
     });
     expect(createRes.statusCode).toBe(201);
     const driver = createRes.json();
@@ -84,8 +100,8 @@ describe("fleet app — Fleet REST API", () => {
   it("rejects driver creation with an empty name", async () => {
     const res = await app.inject({
       method: "POST",
-      url: "/drivers",
-      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "" },
+      url: "/drivers?org_id=org-1&fleet_id=fleet-1",
+      payload: { name: "" },
     });
     expect(res.statusCode).toBe(400);
   });
@@ -93,10 +109,8 @@ describe("fleet app — Fleet REST API", () => {
   it("onboards a vehicle asset, then lists and fetches it", async () => {
     const createRes = await app.inject({
       method: "POST",
-      url: "/assets",
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
       payload: {
-        org_id: "org-1",
-        fleet_id: "fleet-1",
         plateNumber: "TN-22-CD-9999",
         vehicleType: "van",
         fuelType: "diesel",
@@ -118,31 +132,72 @@ describe("fleet app — Fleet REST API", () => {
   it("rejects vehicle onboarding with an invalid payload", async () => {
     const res = await app.inject({
       method: "POST",
-      url: "/assets",
-      payload: { org_id: "org-1", fleet_id: "fleet-1" },
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
+      payload: {},
     });
     expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects vehicle onboarding without tenancy query params", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/assets",
+      payload: { plateNumber: "TN-22-CD-9999", vehicleType: "van", fuelType: "diesel" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rolls back the orphaned base Asset when the vehicle plugin call fails", async () => {
+    class ThrowingVehiclePluginClient {
+      async createVehicleDetails(): Promise<never> {
+        throw new VehiclePluginClientError("vehicle plugin unreachable");
+      }
+      async getVehicleDetails() {
+        return null;
+      }
+    }
+
+    const failingApp = buildApp({
+      fleetRepo: new InMemoryFleetRepository(),
+      driverRepo: new InMemoryDriverRepository(),
+      assetRepo: new InMemoryAssetRepository(),
+      assignmentRepo: new InMemoryAssignmentRepository(),
+      vehiclePluginClient: new ThrowingVehiclePluginClient() as any,
+    });
+
+    const createRes = await failingApp.inject({
+      method: "POST",
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
+      payload: { plateNumber: "TN-99-ZZ-0001", vehicleType: "van", fuelType: "diesel" },
+    });
+    expect(createRes.statusCode).toBe(502);
+
+    const listRes = await failingApp.inject({
+      method: "GET",
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
+    });
+    expect(listRes.json().assets).toHaveLength(0);
   });
 
   it("assigns a driver to a vehicle, reassigns, and tracks history", async () => {
     const assetRes = await app.inject({
       method: "POST",
-      url: "/assets",
-      payload: { org_id: "org-1", fleet_id: "fleet-1", plateNumber: "TN-05-EF-1111", vehicleType: "car", fuelType: "petrol" },
+      url: "/assets?org_id=org-1&fleet_id=fleet-1",
+      payload: { plateNumber: "TN-05-EF-1111", vehicleType: "car", fuelType: "petrol" },
     });
     const asset = assetRes.json();
 
     const driverARes = await app.inject({
       method: "POST",
-      url: "/drivers",
-      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "Driver A" },
+      url: "/drivers?org_id=org-1&fleet_id=fleet-1",
+      payload: { name: "Driver A" },
     });
     const driverA = driverARes.json();
 
     const driverBRes = await app.inject({
       method: "POST",
-      url: "/drivers",
-      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "Driver B" },
+      url: "/drivers?org_id=org-1&fleet_id=fleet-1",
+      payload: { name: "Driver B" },
     });
     const driverB = driverBRes.json();
 

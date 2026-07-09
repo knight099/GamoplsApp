@@ -20,7 +20,7 @@ export class PrismaAssignmentRepository implements AssignmentRepository {
   async assign(org_id: string, fleet_id: string, asset_id: string, driver_id: string): Promise<DriverAssignment> {
     return this.prisma.$transaction(async (tx: any) => {
       await tx.driverAssignment.updateMany({
-        where: { asset_id, unassigned_at: null },
+        where: { org_id, fleet_id, asset_id, unassigned_at: null },
         data: { unassigned_at: new Date() },
       });
       const created = await tx.driverAssignment.create({

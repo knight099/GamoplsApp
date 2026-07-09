@@ -10,10 +10,13 @@ export const fleetSchema = z.object({
 export type Fleet = z.infer<typeof fleetSchema>;
 
 export const createFleetInputSchema = z.object({
-  org_id: z.string().min(1),
   name: z.string().min(1),
 });
-export type CreateFleetInput = z.infer<typeof createFleetInputSchema>;
+/**
+ * org_id is deliberately NOT part of createFleetInputSchema (the BFF gateway injects it
+ * as a query param, never trusts the body) but repositories still need it to scope the write.
+ */
+export type CreateFleetInput = z.infer<typeof createFleetInputSchema> & { org_id: string };
 
 export const driverStatusSchema = z.enum(["active", "inactive"]);
 
@@ -31,13 +34,16 @@ export const driverSchema = z.object({
 export type Driver = z.infer<typeof driverSchema>;
 
 export const createDriverInputSchema = z.object({
-  org_id: z.string().min(1),
-  fleet_id: z.string().min(1),
   name: z.string().min(1),
   phone: z.string().min(1).nullable().default(null),
   license_number: z.string().min(1).nullable().default(null),
 });
-export type CreateDriverInput = z.infer<typeof createDriverInputSchema>;
+/**
+ * org_id/fleet_id are deliberately NOT part of createDriverInputSchema (the BFF gateway
+ * injects them as query params, never trusts the body) but repositories still need them
+ * to scope the write.
+ */
+export type CreateDriverInput = z.infer<typeof createDriverInputSchema> & { org_id: string; fleet_id: string };
 
 export const updateDriverInputSchema = z.object({
   name: z.string().min(1).optional(),
@@ -63,8 +69,6 @@ export type Asset = z.infer<typeof assetSchema>;
 
 /** Vehicle-specific fields, entered once at onboarding, forwarded to plugins/asset-vehicle — never stored here. */
 export const createVehicleAssetInputSchema = z.object({
-  org_id: z.string().min(1),
-  fleet_id: z.string().min(1),
   plateNumber: z.string().min(1),
   vehicleType: z.enum(["truck", "van", "car", "bike", "bus", "other"]),
   fuelType: z.enum(["petrol", "diesel", "electric", "hybrid", "cng"]),

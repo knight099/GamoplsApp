@@ -43,7 +43,7 @@ export interface Asset {
   telemetry_updated_at: string | null;
   created_at: string;
   updated_at: string;
-  vehicleDetails: VehicleDetails | null;
+  vehicleDetails?: VehicleDetails | null;
 }
 
 export interface DriverAssignment {
