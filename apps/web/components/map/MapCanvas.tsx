@@ -3,6 +3,8 @@
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import Link from "next/link";
+import { Badge } from "@gamopls/ui";
 import type { Geofence } from "./types";
 
 export interface MapMarkerData {
@@ -61,7 +63,25 @@ export function MapCanvas({ markers, geofences }: MapCanvasProps) {
       />
       {markers.map((marker) => (
         <Marker key={marker.id} position={[marker.lat, marker.lng]} icon={markerIcon(marker.healthScore)}>
-          <Popup>{marker.label}</Popup>
+          <Popup>
+            <div style={{ minWidth: "160px" }}>
+              <div style={{ fontWeight: 700, marginBottom: "0.25rem" }}>{marker.label}</div>
+              {marker.healthScore !== undefined && (
+                <div style={{ marginBottom: "0.25rem" }}>
+                  <Badge tone={healthTone(marker.healthScore)}>Health {marker.healthScore}</Badge>
+                </div>
+              )}
+              {marker.fuelPct !== undefined && marker.fuelPct !== null && (
+                <div style={{ fontSize: "0.75rem" }}>Fuel: {marker.fuelPct}%</div>
+              )}
+              {marker.odometerKm !== undefined && marker.odometerKm !== null && (
+                <div style={{ fontSize: "0.75rem" }}>Odometer: {marker.odometerKm.toLocaleString()} km</div>
+              )}
+              <Link href={`/fleet/vehicles/${marker.id}`} style={{ fontSize: "0.75rem", color: "#22d3ee", display: "inline-block", marginTop: "0.4rem" }}>
+                More details →
+              </Link>
+            </div>
+          </Popup>
         </Marker>
       ))}
       {geofences.map((geofence) => (

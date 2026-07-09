@@ -57,4 +57,26 @@ describe("MapCanvas", () => {
     expect(screen.queryByTestId("marker")).not.toBeInTheDocument();
     expect(screen.queryByTestId("circle")).not.toBeInTheDocument();
   });
+
+  it("shows health/fuel/odometer in the popup when present, and a More details link", () => {
+    const richMarker: MapMarkerData = {
+      ...marker,
+      healthScore: 91,
+      fuelPct: 54,
+      odometerKm: 15234,
+    };
+    render(<MapCanvas markers={[richMarker]} geofences={[]} />);
+
+    expect(screen.getByText(/91/)).toBeInTheDocument();
+    expect(screen.getByText(/54%/)).toBeInTheDocument();
+    expect(screen.getByText(/15,234 km/)).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /more details/i });
+    expect(link).toHaveAttribute("href", "/fleet/vehicles/asset-1");
+  });
+
+  it("degrades gracefully when fleet data is missing for a marker", () => {
+    render(<MapCanvas markers={[marker]} geofences={[]} />);
+    expect(screen.getByText("Truck 42")).toBeInTheDocument();
+    expect(screen.queryByText(/fuel/i)).not.toBeInTheDocument();
+  });
 });
