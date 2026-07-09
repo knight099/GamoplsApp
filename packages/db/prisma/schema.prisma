@@ -181,6 +181,7 @@ model Asset {
   health_score         Int       @default(100)
   telemetry            Json      @default("{}")
   telemetry_updated_at DateTime? @db.Timestamptz()
+  last_mileage_kmpl   Decimal?  @db.Decimal
   created_at           DateTime  @default(now()) @db.Timestamptz()
   updated_at           DateTime  @default(now()) @updatedAt @db.Timestamptz()
 
@@ -205,6 +206,21 @@ model DriverAssignment {
   @@index([asset_id, unassigned_at])
   @@index([org_id, fleet_id])
   @@map("driver_assignments")
+}
+
+model MaintenanceSuggestion {
+  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id                   String
+  fleet_id                 String
+  asset_id                 String   @db.Uuid
+  service_type             String
+  suggested_at_odometer_km Decimal  @db.Decimal
+  created_at               DateTime @default(now()) @db.Timestamptz()
+  updated_at               DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  @@unique([asset_id, service_type])
+  @@index([org_id, fleet_id])
+  @@map("maintenance_suggestions")
 }
 
 // ---------------------------------------------------------------------------
@@ -235,4 +251,16 @@ model VehicleDetails {
 
   @@index([plate_number])
   @@map("vehicle_details")
+}
+
+model MaintenanceRecord {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  asset_id               String   @db.Uuid
+  service_type           String   // 'oil_change' | 'brake_inspection' | 'tire_rotation' | 'general_service'
+  performed_at           DateTime @db.Timestamptz()
+  odometer_at_service_km Decimal  @db.Decimal
+  created_at             DateTime @default(now()) @db.Timestamptz()
+
+  @@index([asset_id, service_type])
+  @@map("maintenance_records")
 }
