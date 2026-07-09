@@ -3,6 +3,9 @@ import { InMemoryVehicleDetailsRepository } from "./in-memory-vehicle-details-re
 import { PrismaVehicleDetailsRepository } from "./prisma-vehicle-details-repository.js";
 import { getPrismaClient } from "@gamopls/db";
 import type { VehicleDetailsRepository } from "./vehicle-details-repository.js";
+import { InMemoryMaintenanceRecordRepository } from "./in-memory-maintenance-record-repository.js";
+import { PrismaMaintenanceRecordRepository } from "./prisma-maintenance-record-repository.js";
+import type { MaintenanceRecordRepository } from "./maintenance-record-repository.js";
 
 const port = Number(process.env.PORT ?? 4700);
 const host = process.env.HOST ?? "0.0.0.0";
@@ -17,7 +20,14 @@ if (databaseUrl) {
   repo = new InMemoryVehicleDetailsRepository();
 }
 
-const app = buildApp({ repo });
+let maintenanceRepo: MaintenanceRecordRepository;
+if (databaseUrl) {
+  maintenanceRepo = new PrismaMaintenanceRecordRepository(getPrismaClient());
+} else {
+  maintenanceRepo = new InMemoryMaintenanceRecordRepository();
+}
+
+const app = buildApp({ repo, maintenanceRepo });
 
 app
   .listen({ port, host })

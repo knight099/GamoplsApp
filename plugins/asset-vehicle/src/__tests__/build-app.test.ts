@@ -63,4 +63,23 @@ describe("asset-vehicle app — VehicleDetails REST API", () => {
     expect(patchRes.statusCode).toBe(200);
     expect(patchRes.json().odometerKm).toBe(4200);
   });
+
+  it("creates and lists maintenance records for an asset", async () => {
+    const createRes = await app.inject({
+      method: "POST",
+      url: "/maintenance-records",
+      payload: {
+        assetId: "asset-1",
+        serviceType: "oil_change",
+        performedAt: "2026-06-01T00:00:00.000Z",
+        odometerAtServiceKm: 15000,
+      },
+    });
+    expect(createRes.statusCode).toBe(201);
+
+    const listRes = await app.inject({ method: "GET", url: "/maintenance-records/asset-1" });
+    expect(listRes.statusCode).toBe(200);
+    expect(listRes.json().records).toHaveLength(1);
+    expect(listRes.json().records[0].serviceType).toBe("oil_change");
+  });
 });

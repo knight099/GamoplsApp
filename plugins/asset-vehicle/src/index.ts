@@ -22,3 +22,10 @@ export {
   vehicleTypeSchema,
 } from "./schemas.js";
 export type { CreateVehicleDetailsInput, UpdateVehicleDetailsInput } from "./schemas.js";
+
+export type { MaintenanceRecord, ServiceType } from "./maintenance-record.js";
+export type { MaintenanceRecordRepository } from "./maintenance-record-repository.js";
+export { InMemoryMaintenanceRecordRepository } from "./in-memory-maintenance-record-repository.js";
+export { PrismaMaintenanceRecordRepository } from "./prisma-maintenance-record-repository.js";
+export { serviceTypeSchema, createMaintenanceRecordInputSchema } from "./schemas.js";
+export type { CreateMaintenanceRecordInput } from "./schemas.js";
