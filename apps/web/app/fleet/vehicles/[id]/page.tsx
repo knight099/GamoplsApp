@@ -2,15 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Badge, Card, Spinner } from "@gamopls/ui";
+import { Card, Spinner } from "@gamopls/ui";
 import * as fleetApi from "@/components/fleet/api";
 import type { Asset, DriverAssignment } from "@/components/fleet/types";
-
-function healthTone(score: number): "success" | "warning" | "danger" {
-  if (score >= 80) return "success";
-  if (score >= 50) return "warning";
-  return "danger";
-}
+import { VehicleDigitalTwin } from "@/components/fleet/VehicleDigitalTwin";
 
 export default function VehicleDetailPage() {
   const params = useParams<{ id: string }>();
@@ -66,13 +61,9 @@ export default function VehicleDetailPage() {
         <p className="text-sm text-muted-foreground mt-1">Vehicle detail</p>
       </div>
 
-      <Card className="border border-border bg-card p-6 space-y-3">
-        <div className="flex items-center gap-3">
-          <Badge tone={healthTone(asset.health_score)}>Health {asset.health_score}</Badge>
-          {typeof asset.telemetry.fuel_pct === "number" && (
-            <span className="text-sm text-muted-foreground">Fuel: {asset.telemetry.fuel_pct}%</span>
-          )}
-        </div>
+      <Card className="border border-border bg-card p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white">Digital twin</h2>
+        <VehicleDigitalTwin telemetry={asset.telemetry} healthScore={asset.health_score} />
         {asset.vehicleDetails && (
           <div className="text-sm text-muted-foreground space-y-1">
             <div>Plate: {asset.vehicleDetails.plateNumber}</div>

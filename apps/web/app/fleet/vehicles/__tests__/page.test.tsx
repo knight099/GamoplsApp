@@ -19,7 +19,7 @@ describe("VehicleDetailPage", () => {
       type: "vehicle",
       display_label: "TN-01-AB-1234 (van)",
       health_score: 91,
-      telemetry: { fuel_pct: 60 },
+      telemetry: { fuel_pct: 60, engine_temp_c: 91, battery_pct: 76 },
       telemetry_updated_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -52,7 +52,7 @@ describe("VehicleDetailPage", () => {
     render(<VehicleDetailPage />);
 
     await waitFor(() => expect(screen.getByText("TN-01-AB-1234 (van)")).toBeInTheDocument());
-    expect(screen.getByText(/91/)).toBeInTheDocument();
     expect(screen.getByText(/12,000 km/)).toBeInTheDocument();
+    expect(screen.getByTestId("hotspot-engine")).toBeInTheDocument();
   });
 });
