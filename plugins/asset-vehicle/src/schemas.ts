@@ -27,3 +27,13 @@ export const updateVehicleDetailsInputSchema = z.object({
   model: z.string().min(1).nullable().optional(),
 });
 export type UpdateVehicleDetailsInput = z.infer<typeof updateVehicleDetailsInputSchema>;
+
+export const serviceTypeSchema = z.enum(["oil_change", "brake_inspection", "tire_rotation", "general_service"]);
+
+export const createMaintenanceRecordInputSchema = z.object({
+  assetId: z.string().min(1),
+  serviceType: serviceTypeSchema,
+  performedAt: z.string().datetime(),
+  odometerAtServiceKm: z.number().min(0),
+});
+export type CreateMaintenanceRecordInput = z.infer<typeof createMaintenanceRecordInputSchema>;

@@ -2,9 +2,13 @@ import Fastify, { type FastifyInstance } from "fastify";
 import { InMemoryVehicleDetailsRepository } from "./in-memory-vehicle-details-repository.js";
 import type { VehicleDetailsRepository } from "./vehicle-details-repository.js";
 import { createVehicleDetailsInputSchema, updateVehicleDetailsInputSchema } from "./schemas.js";
+import { InMemoryMaintenanceRecordRepository } from "./in-memory-maintenance-record-repository.js";
+import type { MaintenanceRecordRepository } from "./maintenance-record-repository.js";
+import { createMaintenanceRecordInputSchema } from "./schemas.js";
 
 export interface BuildAppOptions {
   repo?: VehicleDetailsRepository;
+  maintenanceRepo?: MaintenanceRecordRepository;
 }
 
 /**
@@ -17,6 +21,7 @@ export interface BuildAppOptions {
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({ logger: false });
   const repo = options.repo ?? new InMemoryVehicleDetailsRepository();
+  const maintenanceRepo = options.maintenanceRepo ?? new InMemoryMaintenanceRecordRepository();
 
   app.get("/health", async () => ({ status: "ok" }));
 
@@ -45,6 +50,21 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     const record = await repo.update(assetId, parsed.data);
     if (!record) return reply.status(404).send({ error: "not found" });
     return reply.status(200).send(record);
+  });
+
+  app.post("/maintenance-records", async (request, reply) => {
+    const parsed = createMaintenanceRecordInputSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: "invalid payload", details: parsed.error.flatten() });
+    }
+    const record = await maintenanceRepo.create(parsed.data);
+    return reply.status(201).send(record);
+  });
+
+  app.get("/maintenance-records/:assetId", async (request, reply) => {
+    const { assetId } = request.params as { assetId: string };
+    const records = await maintenanceRepo.list(assetId);
+    return reply.status(200).send({ records });
   });
 
   return app;
