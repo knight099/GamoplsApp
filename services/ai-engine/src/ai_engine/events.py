@@ -60,9 +60,32 @@ class TaskSuggested(BaseEvent):
     source: str
 
 
+class AssetLocationUpdated(BaseEvent):
+    """Mirrors `asset-location-updated.ts::assetLocationUpdatedSchema`."""
+
+    type: Literal["AssetLocationUpdated"] = "AssetLocationUpdated"
+    asset_id: str
+    lat: float
+    lng: float
+    heading: float | None = None
+    speed: float | None = None
+
+
+class AlertRaised(BaseEvent):
+    """Mirrors `alert-raised.ts::alertRaisedSchema`."""
+
+    type: Literal["AlertRaised"] = "AlertRaised"
+    asset_id: str
+    severity: Literal["info", "warning", "critical"]
+    reason: str
+    message: str
+
+
 # Subject names used when publishing — kept alongside the models since the
 # event type literal (`type` field) and the pub/sub subject are related but
 # not always identical in a real NATS deployment (subjects often include
 # additional routing segments). For this skeleton, subject == event type.
 ASSET_HEALTH_CHANGED_SUBJECT = "AssetHealthChanged"
 TASK_SUGGESTED_SUBJECT = "TaskSuggested"
+ASSET_LOCATION_UPDATED_SUBJECT = "AssetLocationUpdated"
+ALERT_RAISED_SUBJECT = "AlertRaised"

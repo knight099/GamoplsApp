@@ -3,8 +3,10 @@ import json
 import os
 import sys
 from ai_engine.events import AssetHealthChanged, ASSET_HEALTH_CHANGED_SUBJECT, TASK_SUGGESTED_SUBJECT
+from ai_engine.events import AssetLocationUpdated, ASSET_LOCATION_UPDATED_SUBJECT, ALERT_RAISED_SUBJECT
 from ai_engine.task_suggestion import build_task_suggestion, DEGRADED_HEALTH_THRESHOLD
 from ai_engine.health_score import process_health_event
+from ai_engine.idle_detection import IdleDetector
 from ai_engine.publisher import NatsEventPublisher
 
 async def main():
@@ -26,6 +28,19 @@ async def main():
 
     publisher = NatsEventPublisher(nats_url)
     await publisher.connect()
+
+    idle_detector = IdleDetector()
+
+    async def location_handler(msg):
+        try:
+            payload = json.loads(msg.data.decode("utf-8"))
+            event = AssetLocationUpdated(**payload)
+            alert = idle_detector.process_location_update(event)
+            if alert is not None:
+                await publisher.publish_async(ALERT_RAISED_SUBJECT, alert.model_dump(mode="json"))
+                print(f"ai-engine: published idle AlertRaised for asset {event.asset_id}", flush=True)
+        except Exception as e:
+            print(f"ai-engine error: failed to process AssetLocationUpdated: {e}", file=sys.stderr, flush=True)
 
     async def message_handler(msg):
         subject = msg.subject
@@ -55,6 +70,9 @@ async def main():
 
     await nc.subscribe(ASSET_HEALTH_CHANGED_SUBJECT, cb=message_handler)
     print(f"ai-engine: subscribed to NATS subject '{ASSET_HEALTH_CHANGED_SUBJECT}'", flush=True)
+
+    await nc.subscribe(ASSET_LOCATION_UPDATED_SUBJECT, cb=location_handler)
+    print(f"ai-engine: subscribed to NATS subject '{ASSET_LOCATION_UPDATED_SUBJECT}'", flush=True)
 
     # Keep running
     try:
