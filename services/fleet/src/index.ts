@@ -4,3 +4,8 @@ export { InMemoryFleetRepository } from "./in-memory-fleet-repository.js";
 export { PrismaFleetRepository } from "./prisma-fleet-repository.js";
 export { fleetSchema, createFleetInputSchema } from "./types.js";
 export type { Fleet, CreateFleetInput } from "./types.js";
+export type { DriverRepository } from "./driver-repository.js";
+export { InMemoryDriverRepository } from "./in-memory-driver-repository.js";
+export { PrismaDriverRepository } from "./prisma-driver-repository.js";
+export { driverSchema, createDriverInputSchema, updateDriverInputSchema } from "./types.js";
+export type { Driver, CreateDriverInput, UpdateDriverInput } from "./types.js";

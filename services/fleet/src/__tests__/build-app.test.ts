@@ -35,4 +35,35 @@ describe("fleet app — Fleet REST API", () => {
     const res = await app.inject({ method: "POST", url: "/fleets", payload: { org_id: "org-1", name: "" } });
     expect(res.statusCode).toBe(400);
   });
+
+  it("creates, lists, and updates a driver", async () => {
+    const createRes = await app.inject({
+      method: "POST",
+      url: "/drivers",
+      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "Kumar S" },
+    });
+    expect(createRes.statusCode).toBe(201);
+    const driver = createRes.json();
+    expect(driver.status).toBe("active");
+
+    const listRes = await app.inject({ method: "GET", url: "/drivers?org_id=org-1&fleet_id=fleet-1" });
+    expect(listRes.json().drivers).toHaveLength(1);
+
+    const updateRes = await app.inject({
+      method: "PATCH",
+      url: `/drivers/${driver.id}?org_id=org-1&fleet_id=fleet-1`,
+      payload: { phone: "9876543210" },
+    });
+    expect(updateRes.statusCode).toBe(200);
+    expect(updateRes.json().phone).toBe("9876543210");
+  });
+
+  it("rejects driver creation with an empty name", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/drivers",
+      payload: { org_id: "org-1", fleet_id: "fleet-1", name: "" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
 });
