@@ -61,6 +61,11 @@ export async function createVehicle(input: CreateVehicleInput): Promise<Asset> {
   return parseOrThrow<Asset>(res);
 }
 
+export async function getVehicle(id: string): Promise<Asset> {
+  const res = await fetch(`/api/fleet/assets/${id}`);
+  return parseOrThrow<Asset>(res);
+}
+
 export async function listDrivers(): Promise<Driver[]> {
   const res = await fetch("/api/fleet/drivers");
   const data = await parseOrThrow<{ drivers: Driver[] }>(res);
