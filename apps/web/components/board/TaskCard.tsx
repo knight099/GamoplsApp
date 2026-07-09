@@ -60,7 +60,7 @@ export function TaskCard({ task, mission, onAdvanceStatus, onSetStatus, onAssign
     <Card className="border border-border bg-card/60 p-5 hover:bg-card hover:border-muted-foreground/20 transition-all duration-200">
       <div className="flex justify-between items-start gap-4">
         <div>
-          <h4 className="font-bold text-white text-base leading-snug">{task.title}</h4>
+          <h4 className="font-bold text-foreground text-base leading-snug">{task.title}</h4>
           {task.description && (
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{task.description}</p>
           )}
@@ -80,11 +80,11 @@ export function TaskCard({ task, mission, onAdvanceStatus, onSetStatus, onAssign
       <div className="grid grid-cols-2 gap-4 border-t border-b border-border/40 py-3 my-3 text-xs">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">Mission scope</span>
-          <span className="text-white font-medium">{mission ? mission.title : task.mission_id ?? "— unassigned —"}</span>
+          <span className="text-foreground font-medium">{mission ? mission.title : task.mission_id ?? "— unassigned —"}</span>
         </div>
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">Assigned machine</span>
-          <span className="text-white font-mono">{task.asset_id ?? "— unassigned —"}</span>
+          <span className="text-foreground font-mono">{task.asset_id ?? "— unassigned —"}</span>
         </div>
       </div>
 
