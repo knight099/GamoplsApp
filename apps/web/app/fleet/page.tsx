@@ -12,7 +12,7 @@ export default function FleetPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Fleet</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Fleet</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage vehicles, drivers, and assignments.</p>
       </div>
       <div className="flex gap-2 border-b border-border">
@@ -21,7 +21,7 @@ export default function FleetPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-semibold capitalize border-b-2 transition-colors ${
-              tab === t ? "border-cyan-400 text-white" : "border-transparent text-muted-foreground hover:text-foreground"
+              tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {t}

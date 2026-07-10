@@ -48,7 +48,7 @@ export function DriversPanel() {
       </Card>
 
       <Card className="border border-border bg-card p-6">
-        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2">Drivers</h2>
+        <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border/50 pb-2">Drivers</h2>
         {loading && drivers.length === 0 ? (
           <div className="flex justify-center py-8">
             <Spinner size={24} label="Loading drivers" />
