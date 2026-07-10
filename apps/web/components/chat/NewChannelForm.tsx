@@ -35,8 +35,8 @@ export function NewChannelForm({ onCreate }: NewChannelFormProps) {
 
   return (
     <Card className="border border-border bg-card p-4">
-      <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5">
-        <Plus className="h-4 w-4 text-cyan-400" />
+      <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-1.5">
+        <Plus className="h-4 w-4 text-primary" />
         New Mission Channel
       </h2>
       <form onSubmit={handleSubmit} className="space-y-3">
