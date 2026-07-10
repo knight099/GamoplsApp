@@ -177,7 +177,7 @@ export function BoardView() {
           
           <div className="flex gap-4 flex-wrap">
             <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-              <ListFilter className="h-3.5 w-3.5 text-cyan-400" />
+              <ListFilter className="h-3.5 w-3.5 text-primary" />
               Mission
               <select
                 aria-label="Filter by mission"

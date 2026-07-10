@@ -66,7 +66,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Session Scopes:</span>
               <span className="inline-flex items-center rounded-full bg-blue-400/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-400/20">org: {session.org_id}</span>
-              <span className="inline-flex items-center rounded-full bg-cyan-400/10 px-2.5 py-0.5 text-xs font-semibold text-cyan-400 border border-cyan-400/20">fleet: {session.fleet_id}</span>
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary border border-primary/20">fleet: {session.fleet_id}</span>
               <span className="inline-flex items-center rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-400/20">role: {session.role}</span>
             </div>
           ) : (
