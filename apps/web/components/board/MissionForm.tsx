@@ -37,8 +37,8 @@ export function MissionForm({ onSubmit }: MissionFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-        <Plus className="h-4 w-4 text-cyan-400" />
+      <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5">
+        <Plus className="h-4 w-4 text-primary" />
         New mission
       </h3>
       <div className="space-y-1">

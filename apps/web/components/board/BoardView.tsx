@@ -101,7 +101,7 @@ export function BoardView() {
         <div className="flex justify-center">
           <AlertCircle className="h-12 w-12 text-rose-400" />
         </div>
-        <h2 className="text-xl font-bold text-white">Board</h2>
+        <h2 className="text-xl font-bold text-foreground">Board</h2>
         <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">{error}</p>
         <button 
           onClick={() => void loadAll()} 
@@ -119,7 +119,7 @@ export function BoardView() {
       {/* Header section */}
       <div className="flex justify-between items-center flex-wrap gap-4 border-b border-border/50 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
             Board
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -146,7 +146,7 @@ export function BoardView() {
 
       {/* Missions list */}
       <Card className="border border-border bg-card p-6">
-        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2">Missions</h2>
+        <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border/50 pb-2">Missions</h2>
         {missions.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-6 border border-dashed border-border rounded-lg">
             No missions yet — create one above.
@@ -158,7 +158,7 @@ export function BoardView() {
                 key={mission.id} 
                 className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-background/40 hover:bg-background/80 transition-colors"
               >
-                <span className="font-semibold text-sm text-white">{mission.title}</span>
+                <span className="font-semibold text-sm text-foreground">{mission.title}</span>
                 <Badge tone={mission.status === "active" ? "success" : "neutral"} style={{ fontSize: "10px" }}>
                   {mission.status}
                 </Badge>
@@ -171,7 +171,7 @@ export function BoardView() {
       {/* Tasks listing with filters */}
       <Card className="border border-border bg-card p-6">
         <div className="flex justify-between items-center flex-wrap gap-4 mb-6 border-b border-border/50 pb-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             Tasks
           </h2>
           
