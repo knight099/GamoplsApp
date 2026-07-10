@@ -1,8 +1,10 @@
 // Command core-ingestion subscribes to Edge Box MQTT telemetry topics,
 // normalizes each payload via internal/normalize, and publishes the
-// resulting AssetLocationUpdated/AssetHealthChanged events to NATS via
-// internal/publish. Malformed messages are dropped and logged, never
-// allowed to crash the subscriber loop.
+// resulting events to NATS via internal/publish: location updates on
+// AssetLocationUpdated, raw health readings on AssetHealthRaw (scored and
+// republished as AssetHealthChanged by services/ai-engine). Malformed
+// messages are dropped and logged, never allowed to crash the subscriber
+// loop.
 package main
 
 import (

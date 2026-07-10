@@ -7,7 +7,11 @@ export {
 } from "./events/asset-location-updated.js";
 export type { AssetLocationUpdated } from "./events/asset-location-updated.js";
 
-export { ASSET_HEALTH_CHANGED, assetHealthChangedSchema } from "./events/asset-health-changed.js";
+export {
+  ASSET_HEALTH_CHANGED,
+  ASSET_HEALTH_RAW_SUBJECT,
+  assetHealthChangedSchema,
+} from "./events/asset-health-changed.js";
 export type { AssetHealthChanged } from "./events/asset-health-changed.js";
 
 export { ALERT_RAISED, alertRaisedSchema, alertSeveritySchema } from "./events/alert-raised.js";

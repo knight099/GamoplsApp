@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import sys
-from ai_engine.events import AssetHealthChanged, ASSET_HEALTH_CHANGED_SUBJECT, TASK_SUGGESTED_SUBJECT
+from ai_engine.events import AssetHealthChanged, ASSET_HEALTH_RAW_SUBJECT, ASSET_HEALTH_CHANGED_SUBJECT, TASK_SUGGESTED_SUBJECT
 from ai_engine.events import AssetLocationUpdated, ASSET_LOCATION_UPDATED_SUBJECT, ALERT_RAISED_SUBJECT
 from ai_engine.task_suggestion import build_task_suggestion, DEGRADED_HEALTH_THRESHOLD
 from ai_engine.health_score import process_health_event
@@ -47,16 +47,12 @@ async def main():
         data = msg.data.decode("utf-8")
         try:
             payload = json.loads(data)
-            # Skip messages we published ourselves to avoid infinite recursion
-            if payload.get("telemetry", {}).get("_processed_by_ai"):
-                return
-
             event = AssetHealthChanged(**payload)
-            print(f"ai-engine: received AssetHealthChanged for asset {event.asset_id} (raw score: {event.healthScore})", flush=True)
-            
-            # Mark as processed to prevent loops
-            event.telemetry["_processed_by_ai"] = True
+            print(f"ai-engine: received raw health reading for asset {event.asset_id} (raw score: {event.healthScore})", flush=True)
 
+            # Recompute the score and republish on the SCORED subject.
+            # No loop-breaker marker needed: we consume AssetHealthRaw and
+            # publish AssetHealthChanged, so we never see our own output.
             updated = process_health_event(event)
             await publisher.publish_async(ASSET_HEALTH_CHANGED_SUBJECT, updated.model_dump(mode="json"))
             print(f"ai-engine: recomputed health score for asset {event.asset_id} -> {updated.healthScore}", flush=True)
@@ -68,8 +64,8 @@ async def main():
         except Exception as e:
             print(f"ai-engine error: failed to process message on subject {subject}: {e}", file=sys.stderr, flush=True)
 
-    await nc.subscribe(ASSET_HEALTH_CHANGED_SUBJECT, cb=message_handler)
-    print(f"ai-engine: subscribed to NATS subject '{ASSET_HEALTH_CHANGED_SUBJECT}'", flush=True)
+    await nc.subscribe(ASSET_HEALTH_RAW_SUBJECT, cb=message_handler)
+    print(f"ai-engine: subscribed to NATS subject '{ASSET_HEALTH_RAW_SUBJECT}'", flush=True)
 
     await nc.subscribe(ASSET_LOCATION_UPDATED_SUBJECT, cb=location_handler)
     print(f"ai-engine: subscribed to NATS subject '{ASSET_LOCATION_UPDATED_SUBJECT}'", flush=True)

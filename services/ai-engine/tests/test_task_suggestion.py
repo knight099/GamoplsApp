@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ai_engine.events import (
     ASSET_HEALTH_CHANGED_SUBJECT,
+    ASSET_HEALTH_RAW_SUBJECT,
     TASK_SUGGESTED_SUBJECT,
     AssetHealthChanged,
 )
@@ -107,3 +108,30 @@ class TestProcessAndPublish:
 
         _, suggestion = process_and_publish(raw, publisher, threshold=60.0)
         assert suggestion is not None
+
+    def test_scored_telemetry_passes_through_unpolluted(self):
+        """The published scored event carries the input telemetry verbatim —
+        no `_processed_by_ai` (or any other) marker injected. The raw/scored
+        subject split made the loop-breaker marker unnecessary."""
+        publisher = InMemoryEventPublisher()
+        telemetry = {"battery_pct": 5, "odometer_km": 12345}
+        raw = _make_raw_event(**telemetry)
+
+        process_and_publish(raw, publisher)
+
+        _, health_payload = publisher.published[0]
+        assert "_processed_by_ai" not in health_payload["telemetry"]
+        assert health_payload["telemetry"] == telemetry
+
+    def test_never_publishes_on_the_raw_subject_it_consumes(self):
+        """Loop safety without markers: ai-engine consumes `AssetHealthRaw`
+        and publishes only on the scored/suggestion subjects, so it can
+        never receive its own output."""
+        assert ASSET_HEALTH_RAW_SUBJECT != ASSET_HEALTH_CHANGED_SUBJECT
+
+        publisher = InMemoryEventPublisher()
+        process_and_publish(_make_raw_event(battery_pct=5), publisher)
+
+        subjects = {subject for subject, _ in publisher.published}
+        assert ASSET_HEALTH_RAW_SUBJECT not in subjects
+        assert subjects == {ASSET_HEALTH_CHANGED_SUBJECT, TASK_SUGGESTED_SUBJECT}

@@ -1,7 +1,15 @@
 // Package publish wraps a NATS connection for publishing normalized Edge
-// Box events. Subject naming mirrors the event type name so subscribers
-// (services/map, services/board, etc.) can subscribe by subject without
-// any Edge-Box-specific knowledge.
+// Box events. Location events go out on a subject matching the event type
+// name so subscribers (services/map, services/board, etc.) can subscribe by
+// subject without any Edge-Box-specific knowledge.
+//
+// Health events are the exception: ingestion publishes RAW readings on
+// AssetHealthRaw, consumed ONLY by services/ai-engine, which recomputes the
+// score and republishes the scored event on AssetHealthChanged. Module
+// services subscribe to AssetHealthChanged only. The payload shape (and its
+// `type: "AssetHealthChanged"` literal) is identical on both subjects —
+// only the subject differs. Mirrors
+// packages/event-schemas/src/events/asset-health-changed.ts::ASSET_HEALTH_RAW_SUBJECT.
 package publish
 
 import (
@@ -16,7 +24,7 @@ import (
 
 const (
 	SubjectAssetLocationUpdated = "AssetLocationUpdated"
-	SubjectAssetHealthChanged   = "AssetHealthChanged"
+	SubjectAssetHealthRaw       = "AssetHealthRaw"
 )
 
 // Publisher publishes normalized events to NATS subjects.
@@ -49,8 +57,8 @@ func (p *Publisher) PublishResult(result *normalize.ParseResult) error {
 		}
 	}
 	if result.HealthUpdate != nil {
-		if err := p.publishJSON(SubjectAssetHealthChanged, result.HealthUpdate); err != nil {
-			return fmt.Errorf("publishing AssetHealthChanged: %w", err)
+		if err := p.publishJSON(SubjectAssetHealthRaw, result.HealthUpdate); err != nil {
+			return fmt.Errorf("publishing AssetHealthRaw: %w", err)
 		}
 	}
 	return nil

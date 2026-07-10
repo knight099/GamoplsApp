@@ -6,7 +6,9 @@ in-process code across languages. Field names and JSON shapes here MUST stay
 in lockstep with `packages/event-schemas/src/events/*.ts` by hand — if you
 change a field here, check the TS schema (and vice versa).
 
-Source of truth checked against (2026-07-10):
+Source of truth checked against (2026-07-10, incl. the raw/scored health
+subject split — `ASSET_HEALTH_RAW_SUBJECT` below mirrors
+asset-health-changed.ts::ASSET_HEALTH_RAW_SUBJECT):
   packages/event-schemas/src/common.ts
   packages/event-schemas/src/events/asset-health-changed.ts
   packages/event-schemas/src/events/task-suggested.ts
@@ -83,10 +85,16 @@ class AlertRaised(BaseEvent):
     message: str
 
 
-# Subject names used when publishing — kept alongside the models since the
-# event type literal (`type` field) and the pub/sub subject are related but
-# not always identical in a real NATS deployment (subjects often include
-# additional routing segments). For this skeleton, subject == event type.
+# Subject names used when publishing/subscribing — kept alongside the models
+# since the event type literal (`type` field) and the pub/sub subject are
+# related but not always identical. Health events are the live example:
+# ingestion publishes RAW readings on `AssetHealthRaw`; ai-engine is their
+# ONLY consumer, recomputes the score, and republishes the scored event on
+# `AssetHealthChanged` (ai-engine is the only publisher there). Both carry
+# the same `AssetHealthChanged` payload shape/type literal — only the
+# subject differs. Module services (fleet, map, board, hub) subscribe to
+# `AssetHealthChanged` only.
+ASSET_HEALTH_RAW_SUBJECT = "AssetHealthRaw"
 ASSET_HEALTH_CHANGED_SUBJECT = "AssetHealthChanged"
 TASK_SUGGESTED_SUBJECT = "TaskSuggested"
 ASSET_LOCATION_UPDATED_SUBJECT = "AssetLocationUpdated"

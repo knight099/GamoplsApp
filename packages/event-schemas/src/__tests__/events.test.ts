@@ -3,6 +3,7 @@ import {
   ALERT_RAISED,
   alertRaisedSchema,
   ASSET_HEALTH_CHANGED,
+  ASSET_HEALTH_RAW_SUBJECT,
   assetHealthChangedSchema,
   ASSET_LOCATION_UPDATED,
   assetLocationUpdatedSchema,
@@ -52,6 +53,27 @@ describe("assetLocationUpdatedSchema", () => {
       timestamp: base.timestamp,
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("health subjects (wire contract)", () => {
+  it("keeps the raw subject distinct from the scored subject", () => {
+    // Ingestion publishes raw readings on ASSET_HEALTH_RAW_SUBJECT; only
+    // ai-engine consumes them and republishes scored events on the
+    // AssetHealthChanged subject. Same payload schema on both.
+    expect(ASSET_HEALTH_RAW_SUBJECT).toBe("AssetHealthRaw");
+    expect(ASSET_HEALTH_RAW_SUBJECT).not.toBe(ASSET_HEALTH_CHANGED);
+  });
+
+  it("validates a raw-subject payload with the unforked schema", () => {
+    const result = assetHealthChangedSchema.safeParse({
+      ...base,
+      type: ASSET_HEALTH_CHANGED, // type literal is unchanged on the raw subject
+      asset_id: "asset-1",
+      healthScore: 42,
+      telemetry: { battery_pct: 42 },
+    });
+    expect(result.success).toBe(true);
   });
 });
 
