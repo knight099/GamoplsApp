@@ -109,7 +109,7 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
       <Card className="border border-border bg-card/40 p-6 backdrop-blur-sm">
         <div className="flex items-center justify-between flex-wrap gap-4 border-b border-border/50 pb-4 mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
               Map
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -145,7 +145,7 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
       </Card>
 
       <Card className="border border-border bg-card p-6">
-        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2">Active Asset Feed</h2>
+        <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border/50 pb-2">Active Asset Feed</h2>
         {positionsLoading && positions.length === 0 ? (
           <div className="flex justify-center py-8">
             <Spinner size={24} label="Loading asset positions" />
