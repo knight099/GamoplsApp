@@ -34,8 +34,8 @@ export function SearchPanel() {
 
   return (
     <Card className="border border-border bg-card p-6">
-      <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-1.5">
-        <Search className="h-5 w-5 text-cyan-400" />
+      <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-1.5">
+        <Search className="h-5 w-5 text-primary" />
         Search documents
       </h2>
       <p className="text-xs text-muted-foreground mb-4">
@@ -83,9 +83,9 @@ export function SearchPanel() {
               key={result.documentId}
               className="p-3 hover:bg-background/40 transition-colors flex gap-3 items-start"
             >
-              <FileText className="h-5 w-5 text-cyan-400 shrink-0 mt-0.5" />
+              <FileText className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div className="min-w-0 flex-1">
-                <strong className="text-xs font-bold text-white block">{result.filename}</strong>
+                <strong className="text-xs font-bold text-foreground block">{result.filename}</strong>
                 <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed truncate">{result.snippet}</div>
               </div>
             </li>

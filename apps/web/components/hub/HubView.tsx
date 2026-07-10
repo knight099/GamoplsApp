@@ -51,7 +51,7 @@ export function HubView({ uploaderId }: HubViewProps) {
         <div className="flex justify-center">
           <AlertCircle className="h-12 w-12 text-rose-400" />
         </div>
-        <h2 className="text-xl font-bold text-white">Hub Index Failure</h2>
+        <h2 className="text-xl font-bold text-foreground">Hub Index Failure</h2>
         <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">{error}</p>
         <button 
           onClick={() => void loadDocuments()} 
@@ -69,7 +69,7 @@ export function HubView({ uploaderId }: HubViewProps) {
       {/* Header Section */}
       <div className="flex justify-between items-center flex-wrap gap-4 border-b border-border/50 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
             Hub
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -87,8 +87,8 @@ export function HubView({ uploaderId }: HubViewProps) {
       </div>
 
       <Card className="border border-border bg-card p-6">
-        <h2 className="text-lg font-bold text-white mb-4 border-b border-border/50 pb-2 flex items-center gap-2">
-          <Folder className="h-5 w-5 text-cyan-400" />
+        <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border/50 pb-2 flex items-center gap-2">
+          <Folder className="h-5 w-5 text-primary" />
           Documents
         </h2>
         
