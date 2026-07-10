@@ -35,9 +35,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {/* High Fidelity Sidebar */}
           <aside className="w-64 fixed inset-y-0 left-0 bg-card border-r border-border flex flex-col z-50">
             <div className="h-16 px-6 border-b border-border flex items-center gap-2">
-              <Zap className="h-6 w-6 text-cyan-400 fill-cyan-400/20" />
+              <Zap className="h-6 w-6 text-primary fill-primary/20" />
               <Link href="/" className="font-bold text-lg tracking-tight text-foreground hover:opacity-90">
-                GAMOPLS <span className="text-cyan-400">TeamCore</span>
+                GAMOPLS <span className="text-primary">TeamCore</span>
               </Link>
             </div>
             
