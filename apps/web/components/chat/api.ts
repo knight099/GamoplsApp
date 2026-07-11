@@ -6,10 +6,9 @@ import type { ChatMessage, MissionChannel } from "./types";
  *
  * These ONLY call `/api/chat/...` (never services/chat directly), per
  * CLAUDE.md's API-gateway rule and the contract documented in
- * apps/web/lib/gateway-proxy.ts. The gateway forces org_id/fleet_id from the
- * session JWT on every forwarded request's query string; `createChannel`
- * additionally sends org_id/fleet_id in the body because services/chat's
- * `createChannelBodySchema` requires them there.
+ * apps/web/lib/gateway-proxy.ts. Tenant scope is attached by the gateway
+ * as a signed internal header derived from the session JWT — request
+ * bodies never carry org_id/fleet_id.
  */
 
 async function readJsonOrThrow<T>(res: Response, fallbackMessage: string): Promise<T> {
@@ -28,8 +27,6 @@ export async function fetchChannels(): Promise<MissionChannel[]> {
 }
 
 export interface CreateChannelInput {
-  org_id: string;
-  fleet_id: string;
   mission_id: string;
   name: string;
 }

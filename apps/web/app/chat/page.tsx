@@ -9,13 +9,11 @@ import { ChatView } from "@/components/chat/ChatView";
  * services/chat directly.
  *
  * This top-level page is a Server Component so it can read the verified
- * session (org_id/fleet_id/user_id) via getSession() the same way
- * app/layout.tsx does, then hand those down to the client-side ChatView.
- * Those values are NOT a trust boundary by themselves — the gateway route
- * handler re-verifies the JWT and forces org_id/fleet_id on every forwarded
- * request — they're only used here to populate the "create channel" request
- * body (services/chat's schema requires org_id/fleet_id there) and to stamp
- * outgoing messages with the sender's user id.
+ * session via getSession() the same way app/layout.tsx does. Tenant scope
+ * (org/fleet) is enforced entirely at the gateway — it mints a signed
+ * scope header on every forwarded request — so the only session value the
+ * client view needs is the user id, to stamp outgoing messages with their
+ * sender.
  */
 export default async function ChatPage() {
   const session = await getSession();
@@ -29,5 +27,5 @@ export default async function ChatPage() {
     );
   }
 
-  return <ChatView orgId={session.org_id} fleetId={session.fleet_id} userId={session.user_id} />;
+  return <ChatView userId={session.user_id} />;
 }

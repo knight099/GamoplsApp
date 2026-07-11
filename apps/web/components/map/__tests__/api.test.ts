@@ -40,16 +40,16 @@ describe("fetchFleetPositions", () => {
 });
 
 describe("listGeofences", () => {
-  it("requests geofences scoped to the fleet_id query param", async () => {
+  it("requests geofences with no client-side tenancy — scope comes from the gateway", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ geofences: [{ id: "g1" }] }), { status: 200 }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await listGeofences("fleet-1");
+    const result = await listGeofences();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/map/geofences?fleet_id=fleet-1",
+      "/api/map/geofences",
       expect.objectContaining({ method: "GET" }),
     );
     expect(result).toEqual([{ id: "g1" }]);
@@ -57,15 +57,13 @@ describe("listGeofences", () => {
 });
 
 describe("createGeofence", () => {
-  it("POSTs to /api/map/geofences with a JSON body", async () => {
+  it("POSTs to /api/map/geofences with a tenancy-free JSON body (S-4)", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ id: "g1", name: "Depot" }), { status: 201 }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
     const input = {
-      org_id: "",
-      fleet_id: "fleet-1",
       asset_id: "asset-1",
       name: "Depot",
       centerLat: 1,
@@ -81,6 +79,9 @@ describe("createGeofence", () => {
         body: JSON.stringify(input),
       }),
     );
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+    expect(body).not.toHaveProperty("org_id");
+    expect(body).not.toHaveProperty("fleet_id");
     expect(result).toEqual({ id: "g1", name: "Depot" });
   });
 });

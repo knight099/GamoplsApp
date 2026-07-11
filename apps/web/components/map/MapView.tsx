@@ -52,7 +52,7 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
   const loadGeofences = useCallback(async () => {
     setGeofencesLoading(true);
     try {
-      const data = await listGeofences(fleetId);
+      const data = await listGeofences();
       setGeofences(data);
       setGeofencesError(null);
     } catch (err) {
@@ -60,7 +60,7 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
     } finally {
       setGeofencesLoading(false);
     }
-  }, [fleetId]);
+  }, []);
 
   useEffect(() => {
     void loadPositions();
@@ -160,7 +160,6 @@ export function MapView({ fleetId, pollIntervalMs = 5000 }: MapViewProps) {
       </Card>
 
       <GeofencePanel
-        fleetId={fleetId}
         geofences={geofences}
         loading={geofencesLoading}
         error={geofencesError}

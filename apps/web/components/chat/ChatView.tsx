@@ -10,12 +10,10 @@ import { NewChannelForm } from "./NewChannelForm";
 import type { ChatMessage, MissionChannel } from "./types";
 
 export interface ChatViewProps {
-  orgId: string;
-  fleetId: string;
   userId: string;
 }
 
-export function ChatView({ orgId, fleetId, userId }: ChatViewProps) {
+export function ChatView({ userId }: ChatViewProps) {
   const [channels, setChannels] = useState<MissionChannel[]>([]);
   const [channelsLoading, setChannelsLoading] = useState(true);
   const [channelsError, setChannelsError] = useState<string | null>(null);
@@ -65,7 +63,9 @@ export function ChatView({ orgId, fleetId, userId }: ChatViewProps) {
   }, [selectedChannelId, loadMessages]);
 
   async function handleCreateChannel(input: { mission_id: string; name: string }) {
-    const created = await createChannel({ org_id: orgId, fleet_id: fleetId, ...input });
+    // Tenant scope is attached by the gateway (signed header) — never sent
+    // from the client.
+    const created = await createChannel(input);
     setChannels((current) => [...current, created]);
     setSelectedChannelId(created.id);
   }

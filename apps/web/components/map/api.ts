@@ -8,11 +8,11 @@ import type {
 /**
  * Thin fetch wrappers around `/api/map/...`. Per the gateway contract
  * (apps/web/lib/gateway-proxy.ts), these ALWAYS call the Next.js route
- * handler — never `services/map` directly — and org_id/fleet_id are
- * injected server-side from the caller's session, so we don't (and can't)
- * pass them ourselves except where the downstream REST shape requires a
- * literal value in the body/path (the gateway overwrites org_id/fleet_id
- * regardless of what's sent).
+ * handler — never `services/map` directly. Tenant scope is attached
+ * server-side by the gateway as a signed internal header; clients never
+ * send org_id/fleet_id in bodies or query strings. The one exception is
+ * the positions REST path segment, which the map service checks against
+ * the session scope (mismatch -> 403).
  */
 
 export class MapApiError extends Error {
@@ -51,8 +51,8 @@ export async function fetchFleetPositions(fleetId: string): Promise<FleetPositio
   return parseOrThrow<FleetPositionsResponse>(response);
 }
 
-export async function listGeofences(fleetId: string): Promise<Geofence[]> {
-  const response = await fetch(`/api/map/geofences?fleet_id=${encodeURIComponent(fleetId)}`, {
+export async function listGeofences(): Promise<Geofence[]> {
+  const response = await fetch(`/api/map/geofences`, {
     method: "GET",
     cache: "no-store",
   });

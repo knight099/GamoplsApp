@@ -50,7 +50,7 @@ describe("ChatView", () => {
       throw new Error(`unexpected fetch: ${url}`);
     });
 
-    render(<ChatView orgId="org-1" fleetId="fleet-1" userId="user-1" />);
+    render(<ChatView userId="user-1" />);
 
     expect(await screen.findByText("Ops Channel")).toBeDefined();
     expect(await screen.findByText("hello team")).toBeDefined();
@@ -79,7 +79,7 @@ describe("ChatView", () => {
       throw new Error(`unexpected fetch: ${url}`);
     });
 
-    render(<ChatView orgId="org-1" fleetId="fleet-1" userId="user-1" />);
+    render(<ChatView userId="user-1" />);
     await screen.findByText("hello team");
 
     await user.type(screen.getByLabelText("Message"), "reinforcements en route");
@@ -88,7 +88,7 @@ describe("ChatView", () => {
     expect(await screen.findByText("reinforcements en route")).toBeDefined();
   });
 
-  it("creates a new channel and selects it, sending org_id/fleet_id in the body", async () => {
+  it("creates a new channel and selects it (tenancy comes from the gateway, not the body)", async () => {
     const user = userEvent.setup();
     const created: MissionChannel = { ...CHANNEL, id: "chan-2", mission_id: "mission-2", name: "New Ops" };
 
@@ -96,7 +96,8 @@ describe("ChatView", () => {
       const url = typeof input === "string" ? input : (input as Request).url;
       if (url === "/api/chat/channels" && init?.method === "POST") {
         const payload = JSON.parse(init.body as string);
-        expect(payload).toMatchObject({ org_id: "org-1", fleet_id: "fleet-1", mission_id: "mission-2", name: "New Ops" });
+        expect(payload).toMatchObject({ mission_id: "mission-2", name: "New Ops" });
+        expect(payload).not.toHaveProperty("org_id");
         return jsonResponse(created, 201);
       }
       if (url === "/api/chat/channels") return jsonResponse({ channels: [] });
@@ -104,7 +105,7 @@ describe("ChatView", () => {
       throw new Error(`unexpected fetch: ${url}`);
     });
 
-    render(<ChatView orgId="org-1" fleetId="fleet-1" userId="user-1" />);
+    render(<ChatView userId="user-1" />);
     await waitFor(() => expect(screen.getByText(/no mission channels yet/i)).toBeDefined());
 
     await user.type(screen.getByLabelText("Mission ID"), "mission-2");
@@ -117,7 +118,7 @@ describe("ChatView", () => {
   it("shows a channel-load error state", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ error: "backend down" }, 500));
 
-    render(<ChatView orgId="org-1" fleetId="fleet-1" userId="user-1" />);
+    render(<ChatView userId="user-1" />);
 
     expect(await screen.findByRole("alert")).toHaveProperty("textContent", "backend down");
   });

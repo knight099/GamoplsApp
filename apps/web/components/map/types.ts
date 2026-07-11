@@ -50,14 +50,10 @@ export interface GeofenceListResponse {
   geofences: Geofence[];
 }
 
-/** Payload for creating/updating a geofence via the form. org_id/fleet_id
- * are included to satisfy the backend's schema, but the gateway route
- * handler (apps/web/app/api/map/[...path]/route.ts) overwrites them from
- * the verified JWT server-side regardless of what's sent here — see
- * apps/web/lib/gateway-proxy.ts. */
+/** Payload for creating a geofence via the form. Tenant scope (org/fleet)
+ * is attached server-side by the gateway as a signed header
+ * (apps/web/lib/gateway-proxy.ts) — the body must not carry it. */
 export interface GeofenceFormInput {
-  org_id: string;
-  fleet_id: string;
   asset_id: string;
   name: string;
   centerLat: number;

@@ -4,8 +4,10 @@ import type { Mission, MissionStatus, Task, TaskStatus } from "./types";
  * BOARD's gateway client. Per apps/web/lib/gateway-proxy.ts's contract,
  * every request goes through `fetch('/api/board/...')` — the Next.js route
  * handler at app/api/board/[...path]/route.ts validates the session and
- * injects org_id/fleet_id from the JWT before forwarding to
- * services/board. This module NEVER fetches services/board directly.
+ * attaches the tenant scope as a signed internal header before forwarding
+ * to services/board. Create bodies are tenancy-free by design: the service
+ * takes org/fleet from the gateway header only. This module NEVER fetches
+ * services/board directly.
  */
 
 export class BoardApiError extends Error {

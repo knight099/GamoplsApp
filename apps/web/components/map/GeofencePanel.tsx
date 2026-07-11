@@ -8,7 +8,6 @@ import { Input } from "../ui/input";
 import { ShieldAlert, Trash2 } from "lucide-react";
 
 export interface GeofencePanelProps {
-  fleetId: string;
   geofences: Geofence[];
   loading: boolean;
   error: string | null;
@@ -31,7 +30,7 @@ const EMPTY_FORM: FormState = {
   radiusMeters: "",
 };
 
-export function GeofencePanel({ fleetId, geofences, loading, error, onChanged }: GeofencePanelProps) {
+export function GeofencePanel({ geofences, loading, error, onChanged }: GeofencePanelProps) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -60,8 +59,6 @@ export function GeofencePanel({ fleetId, geofences, loading, error, onChanged }:
     setSubmitting(true);
     try {
       await createGeofence({
-        org_id: "", // overwritten by the gateway from the session JWT
-        fleet_id: fleetId,
         asset_id: form.asset_id.trim(),
         name: form.name.trim(),
         centerLat,
