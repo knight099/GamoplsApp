@@ -12,7 +12,7 @@ import type {
 /**
  * In-memory `BoardRepository` implementation. Used by default in tests
  * (and usable standalone in dev) so nothing here requires a reachable
- * Postgres instance. See `postgres-repository.ts` for the production
+ * Postgres instance. See `prisma-repository.ts` for the production
  * adapter — same interface, swappable at the composition root.
  */
 export class InMemoryBoardRepository implements BoardRepository {

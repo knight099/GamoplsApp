@@ -5,8 +5,6 @@ export type { ChannelRepository } from "./repositories/channel-repository.js";
 export type { MessageRepository } from "./repositories/message-repository.js";
 export { InMemoryChannelRepository } from "./repositories/in-memory-channel-repository.js";
 export { InMemoryMessageRepository } from "./repositories/in-memory-message-repository.js";
-export { PostgresChannelRepository } from "./repositories/postgres-channel-repository.js";
-export { PostgresMessageRepository } from "./repositories/postgres-message-repository.js";
 
 export type {
   ChatMessage,

@@ -42,7 +42,7 @@ pnpm start:all
 
 # Install & local infra
 pnpm install
-docker-compose -f infra/docker-compose.yml up -d   # Postgres/TimescaleDB, Redis, NATS
+docker-compose -f infra/docker-compose.yml up -d   # Postgres/TimescaleDB, Redis, NATS, MQTT
 
 # Run TS workspace services in dev mode (turbo runs all workspace `dev` scripts in parallel)
 pnpm dev

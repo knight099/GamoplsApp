@@ -2,7 +2,6 @@ export { buildApp } from "./build-app.js";
 export type { BuildAppOptions } from "./build-app.js";
 
 export { InMemoryBoardRepository } from "./in-memory-repository.js";
-export { PostgresBoardRepository } from "./postgres-repository.js";
 export type { BoardRepository } from "./repository.js";
 
 export {
