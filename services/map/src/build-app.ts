@@ -195,7 +195,24 @@ export async function buildApp(
       "/ws/fleets/:fleetId/positions",
       { websocket: true },
       async (socket, request) => {
+        // Same tenant-scope rule as the REST positions route (S-3): the
+        // upgrade request must carry a valid gateway-signed scope header,
+        // and the path fleet must match the scope fleet. 1008 = policy
+        // violation.
+        let scope: TenantScope;
+        try {
+          scope = verifyScopeHeader(request.headers[SCOPE_HEADER_NAME], {
+            secret: options.scopeSecret,
+          });
+        } catch {
+          socket.close(1008, "missing or invalid tenant scope");
+          return;
+        }
         const { fleetId } = request.params as { fleetId: string };
+        if (fleetId !== scope.fleet_id) {
+          socket.close(1008, "fleet scope mismatch");
+          return;
+        }
 
         const initial = await mapService.getFleetMarkers(fleetId);
         socket.send(JSON.stringify({ fleet_id: fleetId, positions: initial }));

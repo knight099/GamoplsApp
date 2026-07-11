@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import WebSocket from "ws";
 import type { EventPublisher } from "@gamopls/event-schemas";
+import { SCOPE_HEADER_NAME, signScopeHeader } from "@gamopls/auth";
 import { buildApp } from "../build-app.js";
 import { MapService } from "../map-service.js";
 import { InMemoryPositionCache } from "../cache/in-memory-position-cache.js";
@@ -9,6 +10,11 @@ import { InMemoryPositionCache } from "../cache/in-memory-position-cache.js";
 function noopPublisher(): EventPublisher {
   return { publish: vi.fn().mockResolvedValue(undefined) };
 }
+
+const SCOPE_SECRET = "map-ws-test-secret";
+const scopeHeaders = (org_id = "org-1", fleet_id = "fleet-1") => ({
+  [SCOPE_HEADER_NAME]: signScopeHeader({ org_id, fleet_id }, { secret: SCOPE_SECRET }),
+});
 
 /**
  * A queue-backed WS test client. Attaches its `message` listener the
@@ -23,8 +29,8 @@ class QueuedWsClient {
   private readonly queue: Record<string, unknown>[] = [];
   private readonly waiters: Array<(msg: Record<string, unknown>) => void> = [];
 
-  constructor(url: string) {
-    this.socket = new WebSocket(url);
+  constructor(url: string, headers?: Record<string, string>) {
+    this.socket = new WebSocket(url, { headers });
     this.socket.on("message", (data) => {
       const parsed = JSON.parse(data.toString()) as Record<string, unknown>;
       const waiter = this.waiters.shift();
@@ -61,7 +67,7 @@ describe("map WebSocket live positions stream", () => {
 
   beforeEach(async () => {
     mapService = new MapService(new InMemoryPositionCache(), noopPublisher());
-    app = await buildApp(mapService);
+    app = await buildApp(mapService, { scopeSecret: SCOPE_SECRET });
     const address = await app.listen({ port: 0, host: "127.0.0.1" });
     baseUrl = address.replace("http://", "ws://");
   });
@@ -81,7 +87,7 @@ describe("map WebSocket live positions stream", () => {
       timestamp: new Date().toISOString(),
     });
 
-    const client = new QueuedWsClient(`${baseUrl}/ws/fleets/fleet-1/positions`);
+    const client = new QueuedWsClient(`${baseUrl}/ws/fleets/fleet-1/positions`, scopeHeaders());
     await client.waitForOpen();
 
     const initial = await client.nextMessage();
@@ -110,7 +116,7 @@ describe("map WebSocket live positions stream", () => {
   });
 
   it("scopes the stream to the requested fleet — updates from another fleet are not pushed", async () => {
-    const client = new QueuedWsClient(`${baseUrl}/ws/fleets/fleet-1/positions`);
+    const client = new QueuedWsClient(`${baseUrl}/ws/fleets/fleet-1/positions`, scopeHeaders());
     await client.waitForOpen();
     await client.nextMessage(); // initial empty snapshot
 
@@ -133,5 +139,19 @@ describe("map WebSocket live positions stream", () => {
     expect(receivedSecond).toBe(false);
 
     client.close();
+  });
+
+  it("closes the socket with 1008 when the scope header is missing (S-3)", async () => {
+    const ws = new WebSocket(`${baseUrl}/ws/fleets/fleet-1/positions`);
+    const code = await new Promise<number>((resolve) => ws.on("close", (c) => resolve(c)));
+    expect(code).toBe(1008);
+  });
+
+  it("closes the socket with 1008 when the fleet path is outside the scope (S-3)", async () => {
+    const ws = new WebSocket(`${baseUrl}/ws/fleets/fleet-OTHER/positions`, {
+      headers: scopeHeaders("org-1", "fleet-1"),
+    });
+    const code = await new Promise<number>((resolve) => ws.on("close", (c) => resolve(c)));
+    expect(code).toBe(1008);
   });
 });
