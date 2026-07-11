@@ -1,6 +1,7 @@
 import { jwtVerify, SignJWT, errors as joseErrors } from "jose";
 import type { GamoplsJwtClaims, VerifiedGamoplsJwtClaims } from "./claims.js";
 import { isGamoplsJwtClaims } from "./claims.js";
+import { assertProductionSecret } from "./scope-header.js";
 
 const DEFAULT_EXPIRES_IN = "1h";
 const ALG = "HS256";
@@ -16,6 +17,8 @@ export class JwtVerificationError extends Error {
 }
 
 function resolveSecretKey(secret: string): Uint8Array {
+  // Refuse .env.example placeholder secrets in production (S-6).
+  assertProductionSecret("JWT_SECRET", secret);
   return new TextEncoder().encode(secret);
 }
 

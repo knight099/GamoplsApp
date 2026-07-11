@@ -11,6 +11,7 @@ export {
   SCOPE_HEADER_NAME,
   DEV_SCOPE_SECRET_FALLBACK,
   ScopeVerificationError,
+  assertProductionSecret,
   signScopeHeader,
   verifyScopeHeader,
 } from "./scope-header.js";

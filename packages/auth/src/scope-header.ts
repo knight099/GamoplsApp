@@ -42,13 +42,31 @@ export class ScopeVerificationError extends Error {
 
 function resolveScopeSecret(explicit?: string): string {
   const secret = explicit ?? process.env.INTERNAL_SCOPE_SECRET;
-  if (secret && secret.length > 0) return secret;
+  if (secret && secret.length > 0) {
+    assertProductionSecret("INTERNAL_SCOPE_SECRET", secret);
+    return secret;
+  }
   if (process.env.NODE_ENV === "production") {
     throw new Error(
       "INTERNAL_SCOPE_SECRET is not set. It must be configured in production (see .env.example) or passed as { secret } explicitly.",
     );
   }
   return DEV_SCOPE_SECRET_FALLBACK;
+}
+
+/**
+ * Refuses placeholder secrets in production (suggestions.md S-6): the
+ * .env.example values all start with "changeme", and the dev fallback is a
+ * known constant — both are public knowledge, so running production with
+ * them means anyone can forge tokens/headers.
+ */
+export function assertProductionSecret(name: string, secret: string): void {
+  if (process.env.NODE_ENV !== "production") return;
+  if (secret.startsWith("changeme") || secret === DEV_SCOPE_SECRET_FALLBACK) {
+    throw new Error(
+      `${name} is set to a placeholder value. Generate a real secret before running in production.`,
+    );
+  }
 }
 
 function hmac(secret: string, payload: string): Buffer {

@@ -119,6 +119,19 @@ export function createGatewayHandler(serviceBaseUrlEnvVar: string) {
     request: NextRequest,
     context: GatewayRouteContext,
   ): Promise<NextResponse> {
+    // CSRF hardening (suggestions.md S-9): the session cookie is
+    // SameSite=Lax, which already blocks cross-site POSTs; this Origin
+    // check documents and enforces the invariant explicitly so a future
+    // cookie-policy change can't silently reopen it. Browsers always send
+    // Origin on cross-origin mutating requests; same-origin requests
+    // either omit it or send our own origin.
+    if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+      const origin = request.headers.get("origin");
+      if (origin && origin !== request.nextUrl.origin) {
+        return NextResponse.json({ error: "Forbidden: cross-origin request" }, { status: 403 });
+      }
+    }
+
     const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized: missing session" }, { status: 401 });
