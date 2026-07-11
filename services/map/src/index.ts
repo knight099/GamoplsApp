@@ -11,7 +11,7 @@ export { GeofenceStore } from "./geofence/geofence-store.js";
 export { GeofenceExitDetector } from "./geofence/geofence-detector.js";
 export { distanceMeters } from "./geofence/haversine.js";
 export {
-  geofenceInputSchema,
+  geofenceBodySchema,
   geofenceUpdateSchema,
   type Geofence,
   type GeofenceInput,

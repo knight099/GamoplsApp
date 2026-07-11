@@ -538,6 +538,9 @@ importers:
       '@gamopls/asset-contracts':
         specifier: workspace:*
         version: link:../../packages/asset-contracts
+      '@gamopls/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@gamopls/event-bus-nats':
         specifier: workspace:*
         version: link:../../packages/event-bus-nats

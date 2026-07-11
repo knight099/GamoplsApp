@@ -45,8 +45,9 @@ export class GeofenceStore {
     return this.geofences.delete(id);
   }
 
-  list(filter?: { fleet_id?: string; asset_id?: string }): Geofence[] {
+  list(filter?: { org_id?: string; fleet_id?: string; asset_id?: string }): Geofence[] {
     return Array.from(this.geofences.values()).filter((g) => {
+      if (filter?.org_id && g.org_id !== filter.org_id) return false;
       if (filter?.fleet_id && g.fleet_id !== filter.fleet_id) return false;
       if (filter?.asset_id && g.asset_id !== filter.asset_id) return false;
       return true;

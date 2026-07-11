@@ -26,6 +26,7 @@
   "dependencies": {
     "@fastify/websocket": "^11.0.2",
     "@gamopls/asset-contracts": "workspace:*",
+    "@gamopls/auth": "workspace:*",
     "@gamopls/event-bus-nats": "workspace:*",
     "@gamopls/event-schemas": "workspace:*",
     "@upstash/redis": "^1.34.3",
