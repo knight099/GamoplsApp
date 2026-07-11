@@ -48,14 +48,16 @@ export type Mission = z.infer<typeof missionSchema>;
 /** Generic, asset-type-agnostic list of fields this schema is allowed to have. */
 export const ALLOWED_MISSION_FIELDS = Object.keys(missionSchema.shape) as (keyof Mission)[];
 
-export const createMissionInputSchema = z.object({
-  org_id: z.string().min(1),
-  fleet_id: z.string().min(1),
+/** Request-body schema: tenancy comes from the gateway-signed scope header
+ * (x-gamopls-scope), NEVER from the body (suggestions.md S-1). */
+export const createMissionBodySchema = z.object({
   title: z.string().min(1),
   description: z.string().default(""),
   status: missionStatusSchema.default("active"),
 });
-export type CreateMissionInput = z.infer<typeof createMissionInputSchema>;
+export type CreateMissionBody = z.infer<typeof createMissionBodySchema>;
+/** Repo-facing input: body plus the header-derived tenant scope. */
+export type CreateMissionInput = CreateMissionBody & { org_id: string; fleet_id: string };
 
 export const updateMissionInputSchema = z.object({
   title: z.string().min(1).optional(),
@@ -106,16 +108,18 @@ export const FORBIDDEN_ASSET_SPECIFIC_FIELDS = [
   "vesselImo",
 ] as const;
 
-export const createTaskInputSchema = z.object({
-  org_id: z.string().min(1),
-  fleet_id: z.string().min(1),
+/** Request-body schema: tenancy comes from the gateway-signed scope header
+ * (x-gamopls-scope), NEVER from the body (suggestions.md S-1). */
+export const createTaskBodySchema = z.object({
   mission_id: z.string().min(1).nullable().default(null),
   title: z.string().min(1),
   description: z.string().default(""),
   status: taskStatusSchema.default("open"),
   asset_id: z.string().min(1).nullable().default(null),
 });
-export type CreateTaskInput = z.infer<typeof createTaskInputSchema>;
+export type CreateTaskBody = z.infer<typeof createTaskBodySchema>;
+/** Repo-facing input: body plus the header-derived tenant scope. */
+export type CreateTaskInput = CreateTaskBody & { org_id: string; fleet_id: string };
 
 export const updateTaskInputSchema = z.object({
   mission_id: z.string().min(1).nullable().optional(),
