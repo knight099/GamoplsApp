@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJwt, JwtVerificationError, SESSION_COOKIE_NAME } from "@gamopls/auth";
+import {
+  verifyJwt,
+  JwtVerificationError,
+  SESSION_COOKIE_NAME,
+  SCOPE_HEADER_NAME,
+  signScopeHeader,
+} from "@gamopls/auth";
 
 /**
  * Shared BFF gateway logic for reaching services/map|chat|board|hub.
@@ -13,18 +19,24 @@ import { verifyJwt, JwtVerificationError, SESSION_COOKIE_NAME } from "@gamopls/a
  *      never reaches the downstream service.
  *   2. Forwards the request to `<baseUrl><path>`, where `baseUrl` comes from
  *      the env var named by `serviceBaseUrlEnvVar` (e.g. "MAP_SERVICE_URL").
- *   3. Injects `org_id`/`fleet_id` as query params derived from the verified
- *      token, OVERWRITING any client-supplied values of the same name — a
- *      caller cannot spoof another tenant's data by hand-editing the query
- *      string, because whatever they put there is discarded and replaced.
+ *   3. Injects the verified tenant scope two ways:
+ *      a. A signed short-TTL `x-gamopls-scope` header (HMAC over
+ *         org_id/fleet_id/exp with INTERNAL_SCOPE_SECRET) — the
+ *         AUTHORITATIVE channel. services/board|chat|map verify it and take
+ *         tenancy exclusively from it; a direct network peer without the
+ *         secret cannot forge it, and any client-supplied copy of the
+ *         header is stripped before signing (see
+ *         HOP_BY_HOP_REQUEST_HEADERS).
+ *      b. `org_id`/`fleet_id` query params, OVERWRITING any client-supplied
+ *         values — transitional, consumed by services/hub and
+ *         services/fleet until they migrate to the header.
  *
- * Contract for the next wave of agents building MAP/CHAT/BOARD/HUB views:
+ * Contract for agents building MAP/CHAT/BOARD/HUB views:
  *   - Call `fetch('/api/map/...')`, `fetch('/api/chat/...')`, etc. from
  *     client/server components. Never fetch services/map etc. directly.
- *   - The downstream service receives `org_id` and `fleet_id` as query
- *     params (see `injectTenantScope`) on every forwarded request,
- *     regardless of HTTP method — services should treat these as the
- *     authoritative tenant scope, not any org_id/fleet_id in a request body.
+ *   - Never put `org_id`/`fleet_id` in request bodies — services derive
+ *     tenant scope from the gateway, and body-carried tenancy is rejected
+ *     schema-side (suggestions.md S-1).
  */
 
 export const ORG_ID_QUERY_PARAM = "org_id";
@@ -36,6 +48,9 @@ const HOP_BY_HOP_REQUEST_HEADERS = new Set([
   "content-length",
   "cookie",
   "transfer-encoding",
+  // Client-supplied scope headers are always discarded; the gateway mints
+  // its own signed header from the verified JWT below.
+  SCOPE_HEADER_NAME,
 ]);
 
 const HOP_BY_HOP_RESPONSE_HEADERS = new Set([
@@ -135,9 +150,15 @@ export function createGatewayHandler(serviceBaseUrlEnvVar: string) {
 
     const hasBody = !["GET", "HEAD"].includes(request.method);
 
+    const headers = forwardableRequestHeaders(request);
+    headers.set(
+      SCOPE_HEADER_NAME,
+      signScopeHeader({ org_id: claims.org_id, fleet_id: claims.fleet_id }),
+    );
+
     const upstreamResponse = await fetch(upstreamUrl, {
       method: request.method,
-      headers: forwardableRequestHeaders(request),
+      headers,
       body: hasBody ? await request.arrayBuffer() : undefined,
       // @ts-expect-error -- duplex is required by undici for streaming bodies but missing from the RequestInit type.
       duplex: hasBody ? "half" : undefined,

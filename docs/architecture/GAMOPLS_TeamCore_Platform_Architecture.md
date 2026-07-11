@@ -165,12 +165,14 @@ Every request is scoped by `org_id` and `fleet_id`. Enforcement happens **once, 
 2. **Gateway** → `apps/web/lib/gateway-proxy.ts` (`createGatewayHandler`) intercepts every `/api/{map,chat,board,hub}/...` request:
    - Reads the JWT from the `httpOnly` session cookie.
    - Verifies and decodes it via `@gamopls/auth.verifyJwt()`.
-   - **Overwrites** `org_id`/`fleet_id` query params on the forwarded request with the values from the verified token, discarding any client-supplied values.
-3. **Services** → receive `org_id`/`fleet_id` as query params and treat them as authoritative. They do not re-verify the JWT. This is intentional: the trust boundary is at the gateway, and services are not publicly reachable.
+   - **Mints a signed, short-TTL `x-gamopls-scope` header** (`@gamopls/auth.signScopeHeader()`, HMAC-SHA256 over `org_id`/`fleet_id`/`exp` keyed by `INTERNAL_SCOPE_SECRET`), after stripping any client-supplied copy of that header.
+   - **Overwrites** `org_id`/`fleet_id` query params on the forwarded request with the values from the verified token, discarding any client-supplied values (transitional channel, see below).
+3. **Services** → `board`/`chat`/`map` verify the scope header (`@gamopls/auth.verifyScopeHeader()`) and take tenancy **exclusively** from it — query params and request bodies are never consulted for scope. Requests without a valid header are rejected with 401, so a network peer that bypasses the gateway cannot act in any tenant's scope without the internal secret. `hub`/`fleet` still consume the gateway-injected query params (already gateway-safe, migration to the header pending); services do not re-verify the user JWT itself.
 
-### Security fix (discovered during V1 build)
+### Security fixes (discovered during V1 build and the 2026-07 review)
 
-`services/hub`'s document upload initially trusted `org_id`/`fleet_id` from the **request body** instead of the gateway-forced query params — a cross-tenant write vulnerability. Fixed in `services/hub/src/schemas.ts` and `services/hub/src/build-app.ts`. A regression test (`services/hub/src/__tests__/`) proves a spoofed body `org_id` is ignored.
+- `services/hub`'s document upload initially trusted `org_id`/`fleet_id` from the **request body** instead of the gateway-forced query params — a cross-tenant write vulnerability. Fixed in `services/hub/src/schemas.ts` and `services/hub/src/build-app.ts`. A regression test (`services/hub/src/__tests__/`) proves a spoofed body `org_id` is ignored.
+- The 2026-07 review (`suggestions.md` S-1/S-3/S-4) found the same body-trust in `board`/`chat` create routes, no tenancy checks at all on `chat`/`map` by-id routes (IDOR), and `map` positions scoped only by the URL path param. Fixed by the signed scope header above plus per-route ownership checks (cross-tenant access returns 404; a positions path/scope mismatch returns 403); all `org_id`/`fleet_id` fields were removed from request-body schemas.
 
 ---
 
