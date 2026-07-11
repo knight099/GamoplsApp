@@ -54,6 +54,11 @@ export default function VehicleDetailPage() {
   }
 
   const current = history.find((a) => a.unassigned_at === null);
+  // Live odometer from telemetry is the single source of truth
+  // (suggestions.md D-1); the vehicleDetails column only records the
+  // reading at onboarding and is never updated afterwards.
+  const liveOdometerKm =
+    typeof asset.telemetry?.odometer_km === "number" ? asset.telemetry.odometer_km : null;
 
   return (
     <div className="space-y-6">
@@ -69,7 +74,12 @@ export default function VehicleDetailPage() {
           <div className="text-sm text-muted-foreground space-y-1">
             <div>Plate: {asset.vehicleDetails.plateNumber}</div>
             <div>Type: {asset.vehicleDetails.vehicleType}</div>
-            <div>Odometer: {asset.vehicleDetails.odometerKm.toLocaleString()} km</div>
+            <div>
+              Odometer:{" "}
+              {liveOdometerKm !== null
+                ? `${liveOdometerKm.toLocaleString()} km`
+                : `${asset.vehicleDetails.odometerKm.toLocaleString()} km (at onboarding — no live reading yet)`}
+            </div>
             {asset.vehicleDetails.make && <div>Make/Model: {asset.vehicleDetails.make} {asset.vehicleDetails.model}</div>}
           </div>
         )}
@@ -87,7 +97,10 @@ export default function VehicleDetailPage() {
         )}
       </Card>
 
-      <MaintenanceCard assetId={asset.id} currentOdometerKm={asset.vehicleDetails?.odometerKm ?? 0} />
+      <MaintenanceCard
+        assetId={asset.id}
+        currentOdometerKm={liveOdometerKm ?? asset.vehicleDetails?.odometerKm ?? 0}
+      />
     </div>
   );
 }
