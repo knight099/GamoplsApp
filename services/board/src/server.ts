@@ -7,7 +7,7 @@ import { subscribeTaskSuggested } from "./task-suggested-handler.js";
 import type { BoardRepository } from "./repository.js";
 
 const port = Number(process.env.PORT ?? 4302);
-const host = process.env.HOST ?? "0.0.0.0";
+const host = process.env.HOST ?? "127.0.0.1";
 const registryUrl = process.env.REGISTRY_URL ?? "http://localhost:4400";
 const natsServers = process.env.NATS_URL ?? "nats://localhost:4222";
 const databaseUrl = process.env.DATABASE_URL;

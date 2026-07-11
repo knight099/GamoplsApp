@@ -8,7 +8,7 @@ import { PrismaMaintenanceRecordRepository } from "./prisma-maintenance-record-r
 import type { MaintenanceRecordRepository } from "./maintenance-record-repository.js";
 
 const port = Number(process.env.PORT ?? 4700);
-const host = process.env.HOST ?? "0.0.0.0";
+const host = process.env.HOST ?? "127.0.0.1";
 const databaseUrl = process.env.DATABASE_URL;
 
 let repo: VehicleDetailsRepository;

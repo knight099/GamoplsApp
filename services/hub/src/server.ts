@@ -23,7 +23,7 @@ const searchProvider = new KeywordSearchProvider(repository);
 
 const app = buildApp({ repository, storage, searchProvider });
 const port = Number(process.env.PORT ?? 4500);
-const host = process.env.HOST ?? "0.0.0.0";
+const host = process.env.HOST ?? "127.0.0.1";
 
 app
   .listen({ port, host })

@@ -18,7 +18,7 @@ if (databaseUrl) {
 
 const app = buildApp({ store });
 const port = Number(process.env.PORT ?? 4400);
-const host = process.env.HOST ?? "0.0.0.0";
+const host = process.env.HOST ?? "127.0.0.1";
 
 app
   .listen({ port, host })

@@ -54,7 +54,7 @@ async function main() {
 
   const app = await buildApp(mapService);
   const port = Number(process.env.PORT ?? 4401);
-  const host = process.env.HOST ?? "0.0.0.0";
+  const host = process.env.HOST ?? "127.0.0.1";
 
   await app.listen({ port, host });
   app.log.info(`map listening on http://${host}:${port}`);

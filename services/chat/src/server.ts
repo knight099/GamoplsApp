@@ -10,7 +10,7 @@ import type { MessageRepository } from "./repositories/message-repository.js";
 import { getPrismaClient } from "@gamopls/db";
 
 const port = Number(process.env.PORT ?? 4300);
-const host = process.env.HOST ?? "0.0.0.0";
+const host = process.env.HOST ?? "127.0.0.1";
 const databaseUrl = process.env.DATABASE_URL;
 const natsServers = process.env.NATS_SERVERS ?? "nats://localhost:4222";
 
