@@ -7,3 +7,15 @@ export {
   buildSessionCookieOptions,
   buildLogoutCookieOptions,
 } from "./session-cookie.js";
+export {
+  SCOPE_HEADER_NAME,
+  DEV_SCOPE_SECRET_FALLBACK,
+  ScopeVerificationError,
+  signScopeHeader,
+  verifyScopeHeader,
+} from "./scope-header.js";
+export type {
+  TenantScope,
+  SignScopeHeaderOptions,
+  VerifyScopeHeaderOptions,
+} from "./scope-header.js";
