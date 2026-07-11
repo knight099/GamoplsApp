@@ -62,6 +62,13 @@ func getenv(key, fallback string) string {
 
 func main() {
 	brokerURL := flag.String("broker", getenv("MQTT_BROKER_URL", "tcp://localhost:1883"), "MQTT broker URL")
+	// Broker credentials (suggestions.md S-2): anonymous MQTT is disabled;
+	// defaults match infra/mosquitto's dev passwd file ("edgebox" is the
+	// device-side user allowed to WRITE edgebox/# topics). Deliberately a
+	// different env var than core-ingestion's MQTT_USERNAME so a shared
+	// root .env can't hand the simulator the service's read-only user.
+	username := flag.String("username", getenv("MQTT_DEVICE_USERNAME", "edgebox"), "MQTT username")
+	password := flag.String("password", getenv("MQTT_DEVICE_PASSWORD", "changeme-dev-only"), "MQTT password")
 	orgID := flag.String("org", "org-chennai-pilot", "org_id to stamp on every reading")
 	fleetID := flag.String("fleet", "fleet-north", "fleet_id to stamp on every reading")
 	deviceCount := flag.Int("devices", 3, "number of simulated Edge Box devices")
@@ -69,6 +76,10 @@ func main() {
 	flag.Parse()
 
 	opts := paho.NewClientOptions().AddBroker(*brokerURL).SetClientID("edgebox-sim")
+	if *username != "" {
+		opts.SetUsername(*username)
+		opts.SetPassword(*password)
+	}
 	client := paho.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		log.Fatalf("failed to connect to MQTT broker at %s: %v", *brokerURL, token.Error())

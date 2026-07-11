@@ -28,6 +28,11 @@ type Options struct {
 	// TopicFilter e.g. "edgebox/+/+/+/telemetry"
 	TopicFilter string
 	QoS         byte
+	// Username/Password authenticate against the broker (S-2: the broker
+	// no longer allows anonymous connections). Empty values are omitted so
+	// tests against an open broker still work.
+	Username string
+	Password string
 }
 
 // Connect dials the MQTT broker and subscribes to TopicFilter, invoking
@@ -39,6 +44,11 @@ func Connect(opts Options, handler Handler) (*Subscriber, error) {
 		SetAutoReconnect(true).
 		SetConnectRetry(true).
 		SetConnectRetryInterval(2 * time.Second)
+
+	if opts.Username != "" {
+		clientOpts.SetUsername(opts.Username)
+		clientOpts.SetPassword(opts.Password)
+	}
 
 	client := paho.NewClient(clientOpts)
 	token := client.Connect()

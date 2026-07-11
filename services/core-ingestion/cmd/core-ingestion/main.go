@@ -28,6 +28,10 @@ func getenv(key, fallback string) string {
 func main() {
 	mqttBrokerURL := getenv("MQTT_BROKER_URL", "tcp://localhost:1883")
 	mqttTopicFilter := getenv("MQTT_TOPIC_FILTER", "edgebox/+/+/+/telemetry")
+	// Broker credentials (suggestions.md S-2): the broker no longer allows
+	// anonymous connections; defaults match infra/mosquitto's dev passwd file.
+	mqttUsername := getenv("MQTT_USERNAME", "core-ingestion")
+	mqttPassword := getenv("MQTT_PASSWORD", "changeme-dev-only")
 	natsURL := getenv("NATS_URL", "nats://localhost:4222")
 
 	publisher, err := publish.NewPublisher(natsURL)
@@ -54,6 +58,8 @@ func main() {
 		ClientID:    "core-ingestion",
 		TopicFilter: mqttTopicFilter,
 		QoS:         1,
+		Username:    mqttUsername,
+		Password:    mqttPassword,
 	}, handler)
 	if err != nil {
 		log.Fatalf("failed to connect to MQTT broker: %v", err)

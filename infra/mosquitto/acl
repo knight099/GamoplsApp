@@ -1,0 +1,12 @@
+# Topic ACLs (suggestions.md S-2).
+#
+# Devices (user "edgebox" in dev; per-device users in production) may only
+# PUBLISH telemetry. The ingestion service may only SUBSCRIBE. Neither can
+# do the other's job, so a leaked device credential cannot be used to spy
+# on the rest of the fleet's traffic.
+
+user edgebox
+topic write edgebox/#
+
+user core-ingestion
+topic read edgebox/#
