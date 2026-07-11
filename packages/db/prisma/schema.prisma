@@ -16,7 +16,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  // Default output (pnpm store's .prisma/client). The previous custom
+  // "../node_modules/.prisma/client" path generated into packages/db's own
+  // node_modules while @prisma/client resolved the store copy — any fresh
+  // `pnpm install` reset the store placeholder and every Prisma-backed
+  // service crashed with "did not initialize" (suggestions.md §7).
 }
 
 datasource db {
@@ -173,7 +177,7 @@ model Driver {
 }
 
 model Asset {
-  id                   String    @id @db.Uuid
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   org_id               String
   fleet_id             String
   type                 String

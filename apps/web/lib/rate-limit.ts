@@ -37,7 +37,7 @@ export function checkRateLimit(
 
   if (state.attempts.length >= limit) {
     buckets.set(key, state);
-    const oldest = state.attempts[0];
+    const oldest = state.attempts[0] ?? now;
     return { allowed: false, retryAfterSeconds: Math.ceil((oldest + windowMs - now) / 1000) };
   }
 

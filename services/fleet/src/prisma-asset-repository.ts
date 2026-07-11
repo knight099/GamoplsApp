@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@gamopls/db";
+import type { Prisma, PrismaClient } from "@gamopls/db";
 import type { AssetRepository, CreateAssetInput } from "./asset-repository.js";
 import type { Asset } from "./types.js";
 
@@ -50,7 +50,11 @@ export class PrismaAssetRepository implements AssetRepository {
   async updateHealth(id: string, health_score: number, telemetry: Record<string, unknown>): Promise<void> {
     await this.prisma.asset.update({
       where: { id },
-      data: { health_score, telemetry, telemetry_updated_at: new Date() },
+      data: {
+        health_score,
+        telemetry: telemetry as Prisma.InputJsonValue,
+        telemetry_updated_at: new Date(),
+      },
     });
   }
 
