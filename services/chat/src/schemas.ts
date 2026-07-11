@@ -2,9 +2,9 @@ import { z } from "zod";
 
 /** REST request-body schemas — separate from the domain types in types.ts. */
 
+/** Tenancy comes from the gateway-signed scope header (x-gamopls-scope),
+ * never the body (suggestions.md S-1). */
 export const createChannelBodySchema = z.object({
-  org_id: z.string().min(1),
-  fleet_id: z.string().min(1),
   mission_id: z.string().min(1),
   name: z.string().min(1),
 });
