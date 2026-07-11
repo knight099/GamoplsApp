@@ -4,10 +4,11 @@ import { getSession } from "@/lib/session";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Globe, MessageSquare, ClipboardList, Files, Truck, Zap, LogOut } from "lucide-react";
+import { Zap, LogOut } from "lucide-react";
 import { FleetSwitcher } from "@/components/fleet/FleetSwitcher";
 import { ThemeProvider } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SidebarNav } from "@/components/sidebar-nav";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -15,14 +16,6 @@ export const metadata = {
   title: "GAMOPLS TeamCore",
   description: "Human-Machine Teaming Platform — MAP / CHAT / BOARD / HUB",
 };
-
-const NAV_LINKS = [
-  { href: "/fleet", label: "Fleet", icon: Truck },
-  { href: "/map", label: "Map", icon: Globe },
-  { href: "/chat", label: "Chat", icon: MessageSquare },
-  { href: "/board", label: "Board", icon: ClipboardList },
-  { href: "/hub", label: "Hub", icon: Files },
-];
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
@@ -41,17 +34,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               </Link>
             </div>
             
-            <nav className="flex-1 py-6 px-4 flex flex-col gap-1">
-              {NAV_LINKS.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link key={link.href} href={link.href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200">
-                    <Icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
+            <SidebarNav />
 
             <div className="p-4 border-t border-border mt-auto bg-muted/30 space-y-3">
               <ThemeToggle />
