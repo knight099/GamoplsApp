@@ -20,3 +20,4 @@ export type {
   SignScopeHeaderOptions,
   VerifyScopeHeaderOptions,
 } from "./scope-header.js";
+export { hashPassword, verifyPassword } from "./password.js";
