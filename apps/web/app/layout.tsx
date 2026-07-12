@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Zap, LogOut } from "lucide-react";
+import { Zap, LogOut, Users } from "lucide-react";
 import { FleetSwitcher } from "@/components/fleet/FleetSwitcher";
 import { ThemeProvider } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -50,6 +50,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   <span className="text-xs font-medium text-foreground truncate max-w-full">
                     {session.user_id}
                   </span>
+                  {session.role === "owner" && (
+                    <a
+                      href="/org"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Users className="h-3 w-3" />
+                      Manage team
+                    </a>
+                  )}
                   <a href="/api/logout" className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-400 hover:text-rose-300 transition-colors mt-2">
                     <LogOut className="h-3 w-3" />
                     Sign Out
