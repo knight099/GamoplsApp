@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { Card, Spinner } from "@gamopls/ui";
+import { Card, Spinner, Button } from "@gamopls/ui";
+import { Radio, Sparkles } from "lucide-react";
 import * as fleetApi from "@/components/fleet/api";
 import type { Asset, DriverAssignment } from "@/components/fleet/types";
 import { VehicleDigitalTwin } from "@/components/fleet/VehicleDigitalTwin";
 import { MaintenanceCard } from "@/components/fleet/MaintenanceCard";
+
+const POLL_INTERVAL_MS = 5000;
 
 export default function VehicleDetailPage() {
   const params = useParams<{ id: string }>();
@@ -14,26 +17,49 @@ export default function VehicleDetailPage() {
   const [history, setHistory] = useState<DriverAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const isFirstLoad = useRef(true);
+
+  const load = useCallback(async () => {
+    if (isFirstLoad.current) setLoading(true);
+    try {
+      const [assetData, historyData] = await Promise.all([
+        fleetApi.getVehicle(params.id),
+        fleetApi.listAssignmentHistory(params.id),
+      ]);
+      setAsset(assetData);
+      setHistory(historyData);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load vehicle");
+    } finally {
+      setLoading(false);
+      isFirstLoad.current = false;
+    }
+  }, [params.id]);
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const [assetData, historyData] = await Promise.all([
-          fleetApi.getVehicle(params.id),
-          fleetApi.listAssignmentHistory(params.id),
-        ]);
-        setAsset(assetData);
-        setHistory(historyData);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load vehicle");
-      } finally {
-        setLoading(false);
-      }
-    }
     void load();
-  }, [params.id]);
+    // Polls so the "connect this vehicle" card disappears and the digital
+    // twin updates once a reading (real or previewed) arrives, without
+    // requiring a manual refresh — same pattern as MapView's position poll.
+    const interval = setInterval(() => void load(), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  async function handlePreview() {
+    if (!asset) return;
+    setPreviewing(true);
+    setPreviewError(null);
+    try {
+      await fleetApi.previewTelemetry(asset.id);
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Failed to send preview data");
+    } finally {
+      setPreviewing(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -66,6 +92,31 @@ export default function VehicleDetailPage() {
         <h1 className="text-2xl font-bold text-foreground tracking-tight">{asset.display_label}</h1>
         <p className="text-sm text-muted-foreground mt-1">Vehicle detail</p>
       </div>
+
+      {asset.telemetry_updated_at === null && (
+        <Card className="border border-primary/20 bg-primary/5 p-6 space-y-3">
+          <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+            <Radio className="h-4 w-4 text-primary" />
+            Connect this vehicle
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Pairing ID: <code className="bg-background/50 px-1.5 py-0.5 rounded">{asset.id}</code> — use this to
+            connect your Edge Box device.
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => void handlePreview()}
+              disabled={previewing}
+              style={{ padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
+            >
+              <Sparkles className="h-3.5 w-3.5" style={{ marginRight: "0.35rem" }} />
+              {previewing ? "Sending…" : "Preview with live data"}
+            </Button>
+            <span className="text-xs text-muted-foreground">Don&apos;t have hardware yet? See it on the map now.</span>
+          </div>
+          {previewError && <p className="text-xs text-rose-400">{previewError}</p>}
+        </Card>
+      )}
 
       <Card className="border border-border bg-card p-6 space-y-4">
         <h2 className="text-lg font-bold text-foreground">Digital twin</h2>

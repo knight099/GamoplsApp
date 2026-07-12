@@ -68,6 +68,11 @@ export async function getVehicle(id: string): Promise<Asset> {
   return parseOrThrow<Asset>(res);
 }
 
+export async function previewTelemetry(assetId: string): Promise<{ published: boolean }> {
+  const res = await fetch(`/api/fleet/assets/${assetId}/preview`, { method: "POST" });
+  return parseOrThrow<{ published: boolean }>(res);
+}
+
 export async function listDrivers(): Promise<Driver[]> {
   const res = await fetch("/api/fleet/drivers");
   const data = await parseOrThrow<{ drivers: Driver[] }>(res);
