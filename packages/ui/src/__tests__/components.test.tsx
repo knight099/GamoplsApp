@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Badge } from "../Badge.js";
+import { Breadcrumb } from "../Breadcrumb.js";
 import { Button } from "../Button.js";
 import { Card } from "../Card.js";
 import { DataTable } from "../DataTable.js";
@@ -36,6 +37,22 @@ describe("@gamopls/ui primitives", () => {
   it("renders StatusChip with a different tone", () => {
     render(<StatusChip tone="success">Connected</StatusChip>);
     expect(screen.getByText("Connected").getAttribute("data-tone")).toBe("success");
+  });
+
+  it("renders Breadcrumb segments with the last one unlinked", () => {
+    render(
+      <Breadcrumb
+        segments={[
+          { label: "Fleet", href: "/fleet" },
+          { label: "TN-09-AB-1234" },
+        ]}
+      />,
+    );
+    const fleetLink = screen.getByText("Fleet");
+    expect(fleetLink.tagName).toBe("A");
+    expect(fleetLink.getAttribute("href")).toBe("/fleet");
+    const last = screen.getByText("TN-09-AB-1234");
+    expect(last.tagName).toBe("SPAN");
   });
 
   it("renders KpiTile with label, value, and unit", () => {

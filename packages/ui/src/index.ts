@@ -13,6 +13,9 @@ export type { StatusChipProps, StatusTone } from "./StatusChip.js";
 export { KpiTile } from "./KpiTile.js";
 export type { KpiTileDelta, KpiTileProps } from "./KpiTile.js";
 
+export { Breadcrumb } from "./Breadcrumb.js";
+export type { BreadcrumbProps, BreadcrumbSegment } from "./Breadcrumb.js";
+
 export { Spinner } from "./Spinner.js";
 export type { SpinnerProps } from "./Spinner.js";
 
