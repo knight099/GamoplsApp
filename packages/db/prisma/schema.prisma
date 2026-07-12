@@ -159,6 +159,50 @@ model Fleet {
   @@map("fleets")
 }
 
+// ---------------------------------------------------------------------------
+// Real auth (suggestions.md S-5) — orgs/users. Fleet gets a real FK to Org
+// in a separate migration so this one stays purely additive and safe to
+// run against a database that already has fleets/assets rows.
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  owner
+  fleet_manager
+  driver // reserved: no driver-facing UI exists yet (no apps/mobile); enforced nowhere today
+}
+
+model Org {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  invite_token String   @unique @default(dbgenerated("gen_random_uuid()"))
+  created_at   DateTime @default(now()) @db.Timestamptz()
+  updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  users User[]
+
+  @@map("orgs")
+}
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id        String   @db.Uuid
+  org           Org      @relation(fields: [org_id], references: [id])
+  email         String   @unique
+  password_hash String
+  name          String
+  role          UserRole @default(fleet_manager)
+  // Last fleet_id issued into this user's JWT (via signup, login, or
+  // /api/switch-fleet). Login re-opens here instead of always defaulting
+  // to the org's first fleet. Nullable only because it doesn't exist
+  // until the first login/switch sets it.
+  last_fleet_id String?  @db.Uuid
+  created_at    DateTime @default(now()) @db.Timestamptz()
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz()
+
+  @@index([org_id])
+  @@map("users")
+}
+
 model Driver {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   org_id         String
