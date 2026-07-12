@@ -150,7 +150,8 @@ model PluginRegistration {
 
 model Fleet {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  org_id     String
+  org_id     String   @db.Uuid
+  org        Org      @relation(fields: [org_id], references: [id])
   name       String
   created_at DateTime @default(now()) @db.Timestamptz()
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz()
@@ -178,7 +179,8 @@ model Org {
   created_at   DateTime @default(now()) @db.Timestamptz()
   updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz()
 
-  users User[]
+  users  User[]
+  fleets Fleet[]
 
   @@map("orgs")
 }
