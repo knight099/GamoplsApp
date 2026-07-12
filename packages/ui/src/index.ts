@@ -7,6 +7,9 @@ export type { CardProps } from "./Card.js";
 export { Badge } from "./Badge.js";
 export type { BadgeProps, BadgeTone } from "./Badge.js";
 
+export { StatusChip } from "./StatusChip.js";
+export type { StatusChipProps, StatusTone } from "./StatusChip.js";
+
 export { Spinner } from "./Spinner.js";
 export type { SpinnerProps } from "./Spinner.js";
 

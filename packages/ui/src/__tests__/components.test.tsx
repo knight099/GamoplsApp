@@ -5,6 +5,7 @@ import { Button } from "../Button.js";
 import { Card } from "../Card.js";
 import { DataTable } from "../DataTable.js";
 import { Spinner } from "../Spinner.js";
+import { StatusChip } from "../StatusChip.js";
 
 describe("@gamopls/ui primitives", () => {
   it("renders a Button with its label and variant", () => {
@@ -23,6 +24,17 @@ describe("@gamopls/ui primitives", () => {
     render(<Badge tone="success">Online</Badge>);
     const badge = screen.getByText("Online");
     expect(badge.getAttribute("data-tone")).toBe("success");
+  });
+
+  it("renders StatusChip with a tone", () => {
+    render(<StatusChip tone="danger">Offline</StatusChip>);
+    const chip = screen.getByText("Offline");
+    expect(chip.getAttribute("data-tone")).toBe("danger");
+  });
+
+  it("renders StatusChip with a different tone", () => {
+    render(<StatusChip tone="success">Connected</StatusChip>);
+    expect(screen.getByText("Connected").getAttribute("data-tone")).toBe("success");
   });
 
   it("renders Spinner with accessible role/label", () => {
