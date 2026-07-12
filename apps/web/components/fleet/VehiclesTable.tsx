@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@gamopls/ui";
+import { StatusChip } from "@gamopls/ui";
 import type { Asset } from "./types";
 
 export interface VehiclesTableProps {
@@ -55,7 +55,7 @@ export function VehiclesTable({ vehicles }: VehiclesTableProps) {
               </Link>
             </td>
             <td className="py-2">
-              <Badge tone={healthTone(v.health_score)}>{v.health_score}</Badge>
+              <StatusChip tone={healthTone(v.health_score)}>{v.health_score}</StatusChip>
             </td>
             <td className="py-2 text-muted-foreground">
               {typeof v.telemetry.fuel_pct === "number" ? `${v.telemetry.fuel_pct}%` : "—"}
