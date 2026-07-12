@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -21,7 +21,7 @@ export default function LoginPage() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -56,12 +56,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Username
+                Email
               </label>
               <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter dispatcher username"
+                type="email"
+                aria-label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
                 required
                 className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-ring"
               />
@@ -73,6 +75,7 @@ export default function LoginPage() {
               </label>
               <Input
                 type="password"
+                aria-label="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -98,8 +101,11 @@ export default function LoginPage() {
           </form>
 
           <div className="border-t border-border pt-6 text-center">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-              Demo Credentials: demo / demo
+            <p className="text-xs text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <a href="/signup" className="font-semibold text-primary hover:underline">
+                Sign up
+              </a>
             </p>
           </div>
         </CardContent>
