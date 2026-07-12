@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 import "./globals.css";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Zap, LogOut, Users } from "lucide-react";
 import { FleetSwitcher } from "@/components/fleet/FleetSwitcher";
@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarNav } from "@/components/sidebar-nav";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
 
 export const metadata = {
   title: "GAMOPLS TeamCore",
@@ -21,7 +22,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const session = await getSession();
 
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
+    <html lang="en" className={cn("font-sans", geist.variable, geistMono.variable)} suppressHydrationWarning>
       <body className="bg-background text-foreground antialiased min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="dark">
         <div className="flex min-h-screen">
