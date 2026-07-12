@@ -31,11 +31,12 @@ const SEVERITY_TONE: Record<string, StatusTone> = {
 export function parseAlertBody(body: string): { severity: string | null; message: string } {
   const match = /^\[([A-Z]+)\]\s*(.*)$/.exec(body);
   if (!match) return { severity: null, message: body };
-  return { severity: match[1], message: match[2] };
+  return { severity: match[1] ?? null, message: match[2] ?? "" };
 }
 
 function alertTone(severity: string | null): StatusTone {
-  return (severity && SEVERITY_TONE[severity]) ?? "neutral";
+  if (!severity) return "neutral";
+  return SEVERITY_TONE[severity] ?? "neutral";
 }
 
 /** Keeps only messages posted by the alert bridge (services/chat/src/alert-bridge.ts's ALERT_BRIDGE_SENDER_ID) — every other message in a channel is regular chat, not an alert. */
