@@ -13,6 +13,9 @@ expect.extend(jestDomMatchers);
 
 vi.mock("../api");
 
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: pushMock }) }));
+
 describe("VehiclesPanel", () => {
   afterEach(() => {
     // @testing-library/react's auto-cleanup relies on detecting a *global*
@@ -20,6 +23,7 @@ describe("VehiclesPanel", () => {
     // without this explicit call, DOM from earlier tests in this file
     // lingers and causes false "multiple elements" matches in later tests.
     cleanup();
+    pushMock.mockClear();
   });
 
   it("loads and displays vehicles", async () => {
@@ -57,9 +61,9 @@ describe("VehiclesPanel", () => {
     expect(screen.getByText(/91/)).toBeInTheDocument();
   });
 
-  it("submits the add-vehicle form with only the required fields", async () => {
+  it("submits the add-vehicle form with only the required fields and navigates to its detail page", async () => {
     vi.mocked(fleetApi.listVehicles).mockResolvedValue([]);
-    vi.mocked(fleetApi.createVehicle).mockResolvedValue({} as any);
+    vi.mocked(fleetApi.createVehicle).mockResolvedValue({ id: "asset-new" } as any);
 
     render(<VehiclesPanel />);
     await waitFor(() => expect(fleetApi.listVehicles).toHaveBeenCalled());
@@ -72,5 +76,6 @@ describe("VehiclesPanel", () => {
         expect.objectContaining({ plateNumber: "TN-02-CD-5678", vehicleType: "car", fuelType: "petrol" }),
       ),
     );
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/fleet/vehicles/asset-new"));
   });
 });

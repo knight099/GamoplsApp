@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, Spinner } from "@gamopls/ui";
 import * as fleetApi from "./api";
 import { AddVehicleForm } from "./AddVehicleForm";
@@ -8,6 +9,7 @@ import { VehiclesTable } from "./VehiclesTable";
 import type { Asset, CreateVehicleInput } from "./types";
 
 export function VehiclesPanel() {
+  const router = useRouter();
   const [vehicles, setVehicles] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +32,11 @@ export function VehiclesPanel() {
   }, [load]);
 
   async function handleCreate(input: CreateVehicleInput) {
-    await fleetApi.createVehicle(input);
-    await load();
+    const created = await fleetApi.createVehicle(input);
+    // Land straight on the new vehicle's detail page — that's where the
+    // pairing ID / "preview with live data" card is waiting, so the next
+    // step after adding a vehicle is immediately visible.
+    router.push(`/fleet/vehicles/${created.id}`);
   }
 
   return (
