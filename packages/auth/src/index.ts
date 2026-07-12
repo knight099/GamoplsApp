@@ -21,3 +21,4 @@ export type {
   VerifyScopeHeaderOptions,
 } from "./scope-header.js";
 export { hashPassword, verifyPassword } from "./password.js";
+export { requireRole } from "./require-role.js";
