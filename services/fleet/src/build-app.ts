@@ -9,6 +9,7 @@ import { VehiclePluginClient, VehiclePluginClientError } from "./vehicle-plugin-
 import type { VehiclePluginClient as VehiclePluginClientType } from "./vehicle-plugin-client.js";
 import { InMemoryAssignmentRepository } from "./in-memory-assignment-repository.js";
 import type { AssignmentRepository } from "./assignment-repository.js";
+import { MqttTelemetryPreviewPublisher, type TelemetryPreviewPublisher } from "./telemetry-preview-publisher.js";
 import {
   createFleetInputSchema,
   createDriverInputSchema,
@@ -24,6 +25,7 @@ export interface BuildAppOptions {
   assetRepo?: AssetRepository;
   assignmentRepo?: AssignmentRepository;
   vehiclePluginClient?: VehiclePluginClientType;
+  telemetryPreviewPublisher?: TelemetryPreviewPublisher;
 }
 
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
@@ -35,6 +37,13 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const vehiclePluginClient =
     options.vehiclePluginClient ??
     new VehiclePluginClient({ baseUrl: process.env.VEHICLE_PLUGIN_URL ?? "http://localhost:4700" });
+  const telemetryPreviewPublisher =
+    options.telemetryPreviewPublisher ??
+    new MqttTelemetryPreviewPublisher({
+      brokerUrl: process.env.MQTT_BROKER_URL ?? "tcp://localhost:1883",
+      username: process.env.MQTT_DEVICE_USERNAME ?? "edgebox",
+      password: process.env.MQTT_DEVICE_PASSWORD ?? "changeme-dev-only",
+    });
 
   app.get("/health", async () => ({ status: "ok" }));
 
@@ -226,6 +235,19 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     if (!asset) return reply.status(404).send({ error: "asset not found" });
     const records = await vehiclePluginClient.getMaintenanceRecords(id);
     return reply.status(200).send({ records });
+  });
+
+  app.post("/assets/:id/preview", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const tenancy = tenancyQuery(request.query);
+    if (!tenancy) return reply.status(400).send({ error: "org_id and fleet_id query params are required" });
+    const asset = await assetRepo.get(id, tenancy.org_id, tenancy.fleet_id);
+    if (!asset) return reply.status(404).send({ error: "asset not found" });
+    if (asset.telemetry_updated_at !== null) {
+      return reply.status(409).send({ error: "asset already has telemetry" });
+    }
+    await telemetryPreviewPublisher.publish({ assetId: id, orgId: tenancy.org_id, fleetId: tenancy.fleet_id });
+    return reply.status(202).send({ published: true });
   });
 
   return app;

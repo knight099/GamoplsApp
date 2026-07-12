@@ -307,3 +307,56 @@ describe("fleet app — Fleet REST API", () => {
     expect(res.statusCode).toBe(400);
   });
 });
+
+class FakeTelemetryPreviewPublisher {
+  readonly published: { assetId: string; orgId: string; fleetId: string }[] = [];
+  async publish(reading: { assetId: string; orgId: string; fleetId: string }): Promise<void> {
+    this.published.push(reading);
+  }
+}
+
+describe("POST /assets/:id/preview", () => {
+  let app: FastifyInstance;
+  let assetRepo: InMemoryAssetRepository;
+  let publisher: FakeTelemetryPreviewPublisher;
+
+  beforeEach(() => {
+    assetRepo = new InMemoryAssetRepository();
+    publisher = new FakeTelemetryPreviewPublisher();
+    app = buildApp({
+      fleetRepo: new InMemoryFleetRepository(),
+      driverRepo: new InMemoryDriverRepository(),
+      assetRepo,
+      assignmentRepo: new InMemoryAssignmentRepository(),
+      vehiclePluginClient: new FakeVehiclePluginClient() as any,
+      telemetryPreviewPublisher: publisher,
+    });
+  });
+
+  it("publishes a preview reading for an asset with no telemetry yet", async () => {
+    const created = await assetRepo.create({ org_id: "org-1", fleet_id: "fleet-1", type: "vehicle", display_label: "Test" });
+    const res = await app.inject({ method: "POST", url: `/assets/${created.id}/preview?org_id=org-1&fleet_id=fleet-1` });
+    expect(res.statusCode).toBe(202);
+    expect(publisher.published).toEqual([{ assetId: created.id, orgId: "org-1", fleetId: "fleet-1" }]);
+  });
+
+  it("returns 404 for an asset outside the caller's tenancy", async () => {
+    const created = await assetRepo.create({ org_id: "org-1", fleet_id: "fleet-1", type: "vehicle", display_label: "Test" });
+    const res = await app.inject({ method: "POST", url: `/assets/${created.id}/preview?org_id=org-2&fleet_id=fleet-2` });
+    expect(res.statusCode).toBe(404);
+    expect(publisher.published).toHaveLength(0);
+  });
+
+  it("returns 409 for an asset that already has telemetry", async () => {
+    const created = await assetRepo.create({ org_id: "org-1", fleet_id: "fleet-1", type: "vehicle", display_label: "Test" });
+    await assetRepo.updateHealth(created.id, 90, { fuel_pct: 50 });
+    const res = await app.inject({ method: "POST", url: `/assets/${created.id}/preview?org_id=org-1&fleet_id=fleet-1` });
+    expect(res.statusCode).toBe(409);
+    expect(publisher.published).toHaveLength(0);
+  });
+
+  it("returns 400 without org_id/fleet_id query params", async () => {
+    const res = await app.inject({ method: "POST", url: "/assets/some-id/preview" });
+    expect(res.statusCode).toBe(400);
+  });
+});
