@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import { issueJwt, SESSION_COOKIE_NAME } from "@gamopls/auth";
-import { createOrgHandler } from "../route.js";
+import { createOrgHandler } from "../handler.js";
 import { InMemoryOrgRepository } from "@/lib/org-repository";
 import { InMemoryUserRepository } from "@/lib/user-repository";
 

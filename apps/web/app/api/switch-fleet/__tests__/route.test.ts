@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { issueJwt, SESSION_COOKIE_NAME, verifyJwt } from "@gamopls/auth";
-import { createSwitchFleetHandler } from "../route.js";
+import { createSwitchFleetHandler } from "../handler.js";
 import { InMemoryUserRepository } from "@/lib/user-repository";
 import * as fleetServiceClient from "@/lib/fleet-service-client";
 

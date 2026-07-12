@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { SESSION_COOKIE_NAME, verifyJwt } from "@gamopls/auth";
-import { createSignupHandler } from "../route.js";
+import { createSignupHandler } from "../handler.js";
 import { InMemoryOrgRepository } from "@/lib/org-repository";
 import { InMemoryUserRepository } from "@/lib/user-repository";
 import * as fleetServiceClient from "@/lib/fleet-service-client";

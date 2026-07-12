@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import { issueJwt, SESSION_COOKIE_NAME } from "@gamopls/auth";
-import { createOrgInviteHandler } from "../route.js";
+import { createOrgInviteHandler } from "../handler.js";
 import { InMemoryOrgRepository } from "@/lib/org-repository";
 
 const SECRET = "test-secret";
