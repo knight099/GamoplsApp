@@ -9,6 +9,7 @@ import { FleetSwitcher } from "@/components/fleet/FleetSwitcher";
 import { ThemeProvider } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { FleetHealthMeter } from "@/components/fleet-health-meter";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
@@ -39,6 +40,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
             <div className="p-4 border-t border-border mt-auto bg-muted/30 space-y-3">
               <ThemeToggle />
+              {session && <FleetHealthMeter />}
               {session ? (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
