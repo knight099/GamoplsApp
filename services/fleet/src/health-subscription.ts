@@ -91,25 +91,37 @@ export async function subscribeAssetHealthChanged(
     }
     const event = parsed.data;
 
-    const existing = await assetRepo.get(event.asset_id, event.org_id, event.fleet_id);
-    const previousTelemetry = existing?.telemetry ?? {};
+    // Schema validation only checks shape (asset_id is any non-empty
+    // string), not that it's a real, already-registered Asset — a
+    // sensor/simulator publishing readings for an asset_id that was never
+    // onboarded (or isn't a valid UUID, since Asset.id is @db.Uuid) must
+    // be dropped-and-logged, never allowed to crash this subscription:
+    // an uncaught error here previously killed the ENTIRE subscription
+    // for the process's lifetime, silently stopping ALL future health
+    // processing — not just for the one bad asset_id.
+    try {
+      const existing = await assetRepo.get(event.asset_id, event.org_id, event.fleet_id);
+      const previousTelemetry = existing?.telemetry ?? {};
 
-    await assetRepo.updateHealth(event.asset_id, event.healthScore, event.telemetry);
+      await assetRepo.updateHealth(event.asset_id, event.healthScore, event.telemetry);
 
-    if (deps.vehiclePluginClient) {
-      const mileage = await computeMileage(event.asset_id, previousTelemetry, event.telemetry, deps.vehiclePluginClient);
-      if (mileage !== null) {
-        await assetRepo.updateMileage(event.asset_id, mileage);
+      if (deps.vehiclePluginClient) {
+        const mileage = await computeMileage(event.asset_id, previousTelemetry, event.telemetry, deps.vehiclePluginClient);
+        if (mileage !== null) {
+          await assetRepo.updateMileage(event.asset_id, mileage);
+        }
+
+        const odometerKm = numberOrNull(event.telemetry.odometer_km);
+        if (odometerKm !== null && deps.suggestionRepo && deps.publisher) {
+          await checkServiceDue(event, odometerKm, {
+            vehiclePluginClient: deps.vehiclePluginClient,
+            suggestionRepo: deps.suggestionRepo,
+            publisher: deps.publisher,
+          });
+        }
       }
-
-      const odometerKm = numberOrNull(event.telemetry.odometer_km);
-      if (odometerKm !== null && deps.suggestionRepo && deps.publisher) {
-        await checkServiceDue(event, odometerKm, {
-          vehiclePluginClient: deps.vehiclePluginClient,
-          suggestionRepo: deps.suggestionRepo,
-          publisher: deps.publisher,
-        });
-      }
+    } catch (err) {
+      console.error(`fleet: dropped AssetHealthChanged for asset ${event.asset_id} — processing error:`, err);
     }
   });
 }

@@ -74,6 +74,55 @@ describe("subscribeAssetHealthChanged", () => {
     await subscribeAssetHealthChanged(fakeSubscriber as any, assetRepo);
     await expect(handler!({ garbage: true })).resolves.toBeUndefined();
   });
+
+  it("drops an event whose processing throws (e.g. a repository rejecting an unknown/malformed asset_id) without killing the subscription", async () => {
+    // Reproduces a live bug: a real Postgres-backed AssetRepository throws
+    // when asset_id isn't a valid UUID (Asset.id is @db.Uuid) — e.g. a
+    // simulator/device publishing readings for an asset that was never
+    // onboarded. Previously this uncaught error propagated out of the
+    // subscription callback and killed the ENTIRE NATS subscription for
+    // the process's lifetime, silently stopping all future health
+    // processing — not just for the one bad event.
+    const assetRepo = {
+      get: vi.fn().mockRejectedValue(new Error("Error creating UUID, invalid character")),
+      updateHealth: vi.fn(),
+      updateMileage: vi.fn(),
+    };
+    let handler: (payload: unknown) => Promise<void>;
+    const fakeSubscriber = {
+      subscribe: vi.fn(async (_subject: string, h: (payload: unknown) => Promise<void>) => {
+        handler = h;
+        return { unsubscribe: async () => {} };
+      }),
+    };
+    await subscribeAssetHealthChanged(fakeSubscriber as any, assetRepo as any);
+
+    await expect(
+      handler!({
+        type: ASSET_HEALTH_CHANGED,
+        org_id: "org-1",
+        fleet_id: "fleet-1",
+        timestamp: new Date().toISOString(),
+        asset_id: "vehicle-001", // not a valid UUID
+        healthScore: 90,
+        telemetry: { fuel_pct: 80 },
+      }),
+    ).resolves.toBeUndefined();
+
+    // A subsequent, valid event on the SAME subscription must still work —
+    // proving the subscription survived the earlier throw.
+    assetRepo.get.mockResolvedValue(null);
+    await handler!({
+      type: ASSET_HEALTH_CHANGED,
+      org_id: "org-1",
+      fleet_id: "fleet-1",
+      timestamp: new Date().toISOString(),
+      asset_id: "8400f7e2-8e93-4b0a-9a2a-000000000001",
+      healthScore: 77,
+      telemetry: { fuel_pct: 60 },
+    });
+    expect(assetRepo.updateHealth).toHaveBeenCalledWith("8400f7e2-8e93-4b0a-9a2a-000000000001", 77, { fuel_pct: 60 });
+  });
 });
 
 describe("subscribeAssetHealthChanged — service-due suggestions", () => {
