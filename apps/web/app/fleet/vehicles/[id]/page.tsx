@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { Card, Spinner, Button } from "@gamopls/ui";
+import { Breadcrumb, Card, Spinner, Button } from "@gamopls/ui";
 import { Radio, Sparkles } from "lucide-react";
 import * as fleetApi from "@/components/fleet/api";
 import type { Asset, DriverAssignment } from "@/components/fleet/types";
@@ -89,7 +89,8 @@ export default function VehicleDetailPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">{asset.display_label}</h1>
+        <Breadcrumb segments={[{ label: "Fleet", href: "/fleet" }, { label: asset.display_label }]} />
+        <h1 className="text-2xl font-bold text-foreground tracking-tight mt-2">{asset.display_label}</h1>
         <p className="text-sm text-muted-foreground mt-1">Vehicle detail</p>
       </div>
 

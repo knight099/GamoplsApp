@@ -53,7 +53,7 @@ describe("VehicleDetailPage", () => {
 
     render(<VehicleDetailPage />);
 
-    await waitFor(() => expect(screen.getByText("TN-01-AB-1234 (van)")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("heading", { name: "TN-01-AB-1234 (van)" })).toBeInTheDocument());
     expect(screen.getByText(/12,000 km/)).toBeInTheDocument();
     expect(screen.getByTestId("hotspot-engine")).toBeInTheDocument();
     expect(screen.getByText(/18.5 km\/L/)).toBeInTheDocument();
