@@ -26,6 +26,9 @@ importers:
       '@gamopls/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@gamopls/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@gamopls/ui':
         specifier: workspace:*
         version: link:../../packages/ui
