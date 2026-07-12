@@ -4,6 +4,7 @@ import { Badge } from "../Badge.js";
 import { Button } from "../Button.js";
 import { Card } from "../Card.js";
 import { DataTable } from "../DataTable.js";
+import { KpiTile } from "../KpiTile.js";
 import { Spinner } from "../Spinner.js";
 import { StatusChip } from "../StatusChip.js";
 
@@ -35,6 +36,27 @@ describe("@gamopls/ui primitives", () => {
   it("renders StatusChip with a different tone", () => {
     render(<StatusChip tone="success">Connected</StatusChip>);
     expect(screen.getByText("Connected").getAttribute("data-tone")).toBe("success");
+  });
+
+  it("renders KpiTile with label, value, and unit", () => {
+    render(<KpiTile icon={<span>icon</span>} label="Avg fleet health" value="87" unit="%" />);
+    expect(screen.getByText("Avg fleet health")).toBeDefined();
+    expect(screen.getByText("87")).toBeDefined();
+    expect(screen.getByText("%")).toBeDefined();
+  });
+
+  it("renders KpiTile's delta row only when delta is provided", () => {
+    const { rerender } = render(<KpiTile icon={<span>icon</span>} label="Active alerts" value="3" />);
+    expect(screen.queryByText(/vs yesterday/)).toBeNull();
+    rerender(
+      <KpiTile
+        icon={<span>icon</span>}
+        label="Active alerts"
+        value="3"
+        delta={{ label: "+1 vs yesterday", tone: "negative" }}
+      />,
+    );
+    expect(screen.getByText(/\+1 vs yesterday/)).toBeDefined();
   });
 
   it("renders Spinner with accessible role/label", () => {

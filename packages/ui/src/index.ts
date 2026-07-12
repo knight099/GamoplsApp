@@ -10,6 +10,9 @@ export type { BadgeProps, BadgeTone } from "./Badge.js";
 export { StatusChip } from "./StatusChip.js";
 export type { StatusChipProps, StatusTone } from "./StatusChip.js";
 
+export { KpiTile } from "./KpiTile.js";
+export type { KpiTileDelta, KpiTileProps } from "./KpiTile.js";
+
 export { Spinner } from "./Spinner.js";
 export type { SpinnerProps } from "./Spinner.js";
 
