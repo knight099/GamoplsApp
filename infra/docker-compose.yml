@@ -16,6 +16,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    mem_limit: 256m
 
   # Mosquitto 2.x with anonymous access disabled (suggestions.md S-2) —
   # credentials + topic ACLs live in ./mosquitto/. Dev creds are
@@ -31,44 +32,7 @@ services:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/passwd:/mosquitto/config/passwd:ro
       - ./mosquitto/acl:/mosquitto/config/acl:ro
-
-  # Local Postgres with TimescaleDB (suggestions.md D-7): matches the
-  # DATABASE_URL in .env.example (localhost:5432). Optional if you point
-  # DATABASE_URL at Neon instead; the timescaledb extension is what the
-  # planned telemetry_readings hypertable (suggestions.md D-2) will use.
-  postgres:
-    image: timescale/timescaledb:latest-pg16
-    container_name: gamopls-postgres
-    restart: unless-stopped
-    environment:
-      # Matches .env.example's DATABASE_URL exactly.
-      POSTGRES_USER: gamopls
-      POSTGRES_PASSWORD: changeme
-      POSTGRES_DB: gamopls_teamcore
-    ports:
-      # Override the host port (e.g. GAMOPLS_POSTGRES_PORT=5433 in root
-      # .env) when another Postgres already occupies 5432 locally.
-      - "${GAMOPLS_POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gamopls -d gamopls_teamcore"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  # Local Redis (suggestions.md D-7): services/map's live position cache
-  # can point REDIS_URL here instead of Upstash for offline dev.
-  redis:
-    image: redis:7-alpine
-    container_name: gamopls-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
+    mem_limit: 128m
 
 volumes:
   nats-data:
-  postgres-data:
-  redis-data:

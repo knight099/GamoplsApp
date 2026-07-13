@@ -30,7 +30,14 @@ const SECURITY_HEADERS = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // react-leaflet@4 (components/map/MapCanvas.tsx) doesn't tear down its
+  // internal Leaflet map instance cleanly across Strict Mode's dev-only
+  // double-invoked effects, throwing "Map container is already
+  // initialized." This only ever manifests in `next dev` — Strict Mode's
+  // extra checks never run in production regardless of this flag — so
+  // turning it off only removes an additional dev-time diagnostic pass,
+  // not any production behavior.
+  reactStrictMode: false,
   devIndicators: false,
   // @gamopls/ui and @gamopls/auth are workspace TS packages published as
   // pre-built ESM (see their tsup builds) — no transpilePackages needed.

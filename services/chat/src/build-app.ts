@@ -47,9 +47,10 @@ function makeRequireScope(scopeSecret?: string) {
 }
 
 /**
- * Builds (but does not start listening) the Fastify app for CHAT. Kept
- * separate from server.ts so tests can use Fastify's `inject()` without
- * binding a real port, mirroring services/registry's convention.
+ * Registers the chat routes directly onto an existing Fastify instance —
+ * the standalone-server path (`buildApp`) and the combined backend
+ * (`services/backend`) both call this, so route logic lives in one
+ * place regardless of how many processes are running.
  *
  * Repositories default to the in-memory implementation so this app is
  * runnable/testable with zero external dependencies; pass Postgres-backed
@@ -61,8 +62,7 @@ function makeRequireScope(scopeSecret?: string) {
  * fleet-level partitioning within an org remains a product decision, not a
  * security boundary.
  */
-export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
-  const app = Fastify({ logger: false });
+export function registerChatRoutes(app: FastifyInstance, options: BuildAppOptions = {}): void {
   const channels = options.channels ?? new InMemoryChannelRepository();
   const messages = options.messages ?? new InMemoryMessageRepository();
   const requireScope = makeRequireScope(options.scopeSecret);
@@ -213,6 +213,15 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     if (!deleted) return reply.status(404).send({ error: "message not found" });
     return reply.status(204).send();
   });
+}
 
+/**
+ * Builds (but does not start listening) a standalone Fastify app for CHAT.
+ * Kept separate from server.ts so tests can use Fastify's `inject()`
+ * without binding a real port, mirroring services/registry's convention.
+ */
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const app = Fastify({ logger: false });
+  registerChatRoutes(app, options);
   return app;
 }

@@ -1,7 +1,8 @@
-export { buildApp } from "./build-app.js";
+export { buildApp, registerHubRoutes } from "./build-app.js";
 export type { BuildAppOptions } from "./build-app.js";
 
 export { InMemoryDocumentRepository } from "./repository.js";
+export { PrismaDocumentRepository } from "./prisma-repository.js";
 export type { DocumentRepository } from "./repository.js";
 
 export { LocalDiskStorageProvider, InMemoryStorageProvider } from "./storage.js";

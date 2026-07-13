@@ -66,9 +66,10 @@ function makeRequireScope(scopeSecret?: string) {
 }
 
 /**
- * Builds (but does not start listening) the Fastify app for `services/map`.
- * Kept separate from `server.ts` so tests can use `.inject()` for REST
- * routes without binding a real port, mirroring `services/registry`.
+ * Registers the map routes directly onto an existing Fastify instance —
+ * the standalone-server path (`buildApp`) and the combined backend
+ * (`services/backend`) both call this, so route logic lives in one
+ * place regardless of how many processes are running.
  *
  * Routes:
  *  - Geofence CRUD: POST/GET/PUT/DELETE `/geofences`
@@ -81,11 +82,11 @@ function makeRequireScope(scopeSecret?: string) {
  * missing one (404); a positions read whose path fleet differs from the
  * scope fleet is rejected with 403.
  */
-export async function buildApp(
+export async function registerMapRoutes(
+  app: FastifyInstance,
   mapService: MapService,
   options: BuildAppOptions = {},
-): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false });
+): Promise<void> {
   await app.register(websocketPlugin);
   const requireScope = makeRequireScope(options.scopeSecret);
 
@@ -225,6 +226,19 @@ export async function buildApp(
       },
     );
   });
+}
 
+/**
+ * Builds (but does not start listening) a standalone Fastify app for
+ * `services/map`. Kept separate from `server.ts` so tests can use
+ * `.inject()` for REST routes without binding a real port, mirroring
+ * `services/registry`.
+ */
+export async function buildApp(
+  mapService: MapService,
+  options: BuildAppOptions = {},
+): Promise<FastifyInstance> {
+  const app = Fastify({ logger: false });
+  await registerMapRoutes(app, mapService, options);
   return app;
 }

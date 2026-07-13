@@ -7,15 +7,14 @@ const prisma = new PrismaClient();
  * Seeds one Org + User matching today's DEMO_LOGIN_* env vars (see
  * apps/web/lib/demo-login.ts, deleted once real login lands) so
  * `demo`/<password> keeps working through the real signup/login path
- * instead of a hardcoded env-var check, and backfills any pre-existing
- * pilot-data fleets carrying the old free-string org id (suggestions.md
- * D-3) so the Fleet FK migration doesn't orphan them.
+ * instead of a hardcoded env-var check.
  */
 async function main() {
   const username = process.env.DEMO_LOGIN_USERNAME ?? "demo";
   const password = process.env.DEMO_LOGIN_PASSWORD ?? "demo";
-  const legacyOrgId = process.env.DEMO_LOGIN_ORG_ID ?? "org-demo";
-  const email = `${username}@example.com`;
+  // DEMO_LOGIN_USERNAME may be a bare handle ("demo") or a full email
+  // ("admin@gamopls.com") — don't double up the domain if it's already one.
+  const email = username.includes("@") ? username : `${username}@example.com`;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -34,13 +33,12 @@ async function main() {
       role: "owner",
     },
   });
+  // Login requires the org to have at least one fleet (see
+  // apps/web/app/api/login/handler.ts's earliestOrgFleet check) — without
+  // this, a freshly seeded user can authenticate but never gets past login.
+  const fleet = await prisma.fleet.create({ data: { org_id: org.id, name: "Demo Fleet" } });
 
-  // fleets.org_id is still a free-text column at this point in the
-  // migration sequence (a later migration tightens it to a real Org FK).
-  const updatedCount = await prisma.$executeRaw`
-    UPDATE fleets SET org_id = ${org.id}::text WHERE org_id = ${legacyOrgId}
-  `;
-  console.log(`seed: created Org ${org.id}, User ${email}, backfilled ${updatedCount} fleet(s)`);
+  console.log(`seed: created Org ${org.id}, Fleet ${fleet.id}, User ${email}`);
 }
 
 main()

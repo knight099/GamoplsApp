@@ -1,0 +1,38 @@
+{
+  "name": "@gamopls/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The single deployable backend for GAMOPLS TeamCore V1: one Fastify process mounting services/map, services/chat, services/board, services/hub, services/fleet, and services/registry as route modules under /map, /chat, /board, /hub, /fleet, /registry. Those services/* packages remain the owners of their routes, schemas, and tests (buildApp() + registerXRoutes()) — this package is only the composition root/process boundary. New product features should be added as CORE plugins (plugins/<name>, self-registering with /registry) rather than new route modules here — see docs/architecture and CLAUDE.md's Deployment topology (V1) section.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/server.ts",
+    "start": "node --env-file-if-exists=../../.env dist/server.js",
+    "build": "tsup src/server.ts --format esm --clean",
+    "lint": "eslint . --config ../../packages/config/eslint.config.mjs",
+    "test": "echo 'no tests for backend (composition-only, routes are tested in their owning service)' && exit 0"
+  },
+  "dependencies": {
+    "@fastify/websocket": "^11.0.2",
+    "@gamopls/board": "workspace:*",
+    "@gamopls/chat": "workspace:*",
+    "@gamopls/db": "workspace:*",
+    "@gamopls/event-bus-nats": "workspace:*",
+    "@gamopls/event-schemas": "workspace:*",
+    "@gamopls/fleet": "workspace:*",
+    "@gamopls/hub": "workspace:*",
+    "@gamopls/map": "workspace:*",
+    "@gamopls/registry": "workspace:*",
+    "@upstash/redis": "^1.34.3",
+    "fastify": "^5.1.0",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "@gamopls/config": "workspace:*",
+    "@types/node": "^20.14.0",
+    "eslint": "^9.15.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

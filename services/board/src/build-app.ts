@@ -51,13 +51,14 @@ function makeRequireScope(scopeSecret?: string) {
 }
 
 /**
- * Builds (but does not start listening) the Fastify app for services/board.
- * Kept separate from server.ts so tests can use `.inject()` without
- * binding a real port, and so composition (which repository, which
- * registry URL) happens at the call site rather than being hardcoded.
+ * Registers the board routes directly onto an existing Fastify instance —
+ * the standalone-server path (`buildApp`) and the combined backend
+ * (`services/backend`) both call this, so route logic lives in one
+ * place regardless of how many processes are running. Composition (which
+ * repository, which registry URL) happens at the call site rather than
+ * being hardcoded.
  */
-export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
-  const app = Fastify({ logger: false });
+export function registerBoardRoutes(app: FastifyInstance, options: BuildAppOptions = {}): void {
   const repo = options.repo ?? new InMemoryBoardRepository();
   const registryUrl = options.registryUrl ?? process.env.REGISTRY_URL ?? "http://localhost:4400";
   const doRegisterAgentPlugin = options.registerAgentPluginFn ?? registerAgentPlugin;
@@ -236,6 +237,15 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
       return reply.status(502).send({ error: "failed to register with plugin registry" });
     }
   });
+}
 
+/**
+ * Builds (but does not start listening) a standalone Fastify app for
+ * services/board. Kept separate from server.ts so tests can use
+ * `.inject()` without binding a real port.
+ */
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const app = Fastify({ logger: false });
+  registerBoardRoutes(app, options);
   return app;
 }

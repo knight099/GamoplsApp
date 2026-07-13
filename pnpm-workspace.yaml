@@ -4,6 +4,7 @@ packages:
   - services/chat
   - services/board
   - services/hub
+  - services/backend
   - services/registry
   - services/fleet
   - packages/*

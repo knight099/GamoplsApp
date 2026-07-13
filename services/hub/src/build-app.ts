@@ -21,14 +21,13 @@ export interface BuildAppOptions {
 }
 
 /**
- * Builds (but does not start listening) the Fastify app for the hub
- * (document/knowledge base) service. Kept separate from server.ts so
- * tests can use Fastify's `inject()` without binding a real port, and so
- * storage/repository/search providers are swappable for tests — see
- * services/registry/src/build-app.ts for the convention this mirrors.
+ * Registers the hub routes directly onto an existing Fastify instance —
+ * the standalone-server path (`buildApp`) and the combined backend
+ * (`services/backend`) both call this, so route logic lives in one
+ * place regardless of how many processes are running. Storage/repository
+ * /search providers are swappable at the call site for tests.
  */
-export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
-  const app = Fastify({ logger: false });
+export function registerHubRoutes(app: FastifyInstance, options: BuildAppOptions = {}): void {
   const repository = options.repository ?? new InMemoryDocumentRepository();
   const storage = options.storage ?? new InMemoryStorageProvider();
   const searchProvider = options.searchProvider ?? new KeywordSearchProvider(repository);
@@ -132,6 +131,15 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     const results = await searchProvider.search(parsed.data.q, parsed.data.org_id, parsed.data.fleet_id);
     return reply.status(200).send({ results });
   });
+}
 
+/**
+ * Builds (but does not start listening) a standalone Fastify app for the
+ * hub (document/knowledge base) service. Kept separate from server.ts so
+ * tests can use Fastify's `inject()` without binding a real port.
+ */
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const app = Fastify({ logger: false });
+  registerHubRoutes(app, options);
   return app;
 }

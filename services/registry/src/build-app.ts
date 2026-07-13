@@ -8,12 +8,12 @@ export interface BuildAppOptions {
 }
 
 /**
- * Builds (but does not start listening) the Fastify app for the plugin
- * registry ("CORE"). Kept separate from server.ts so tests can use
- * Fastify's `inject()` without binding a real port.
+ * Registers the plugin registry ("CORE") routes directly onto an existing
+ * Fastify instance — the standalone-server path (`buildApp`) and the
+ * combined backend (`services/backend`) both call this, so route logic
+ * lives in one place regardless of how many processes are running.
  */
-export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
-  const app = Fastify({ logger: false });
+export function registerRegistryRoutes(app: FastifyInstance, options: BuildAppOptions = {}): void {
   const store = options.store ?? new RegistryStore();
 
   app.post("/plugins/register", async (request, reply) => {
@@ -33,6 +33,15 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     const list = await store.list();
     return reply.status(200).send({ plugins: list });
   });
+}
 
+/**
+ * Builds (but does not start listening) a standalone Fastify app for the
+ * plugin registry ("CORE"). Kept separate from server.ts so tests can use
+ * Fastify's `inject()` without binding a real port.
+ */
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const app = Fastify({ logger: false });
+  registerRegistryRoutes(app, options);
   return app;
 }

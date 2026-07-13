@@ -11,8 +11,12 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=web --filter=@gamopls/backend --filter=@gamopls/asset-vehicle",
+    "start": "turbo run start --filter=web --filter=@gamopls/backend --filter=@gamopls/asset-vehicle",
     "start:all": "node scripts/start-all.mjs",
+    "start:light": "node scripts/start-all.mjs --skip-go --skip-py --skip-sim",
+    "start:web": "node scripts/start-all.mjs --skip-go --skip-py --skip-sim --only=web",
+    "dev:backend": "pnpm --filter @gamopls/backend dev",
     "check:architecture": "node scripts/check-architecture-rules.mjs",
     "test:check-architecture": "vitest run scripts/__tests__/check-architecture-rules.test.mjs"
   },

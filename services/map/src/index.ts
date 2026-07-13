@@ -1,4 +1,4 @@
-export { buildApp } from "./build-app.js";
+export { buildApp, registerMapRoutes } from "./build-app.js";
 export { MapService } from "./map-service.js";
 export type { AssetMetadataInput } from "./map-service.js";
 export { PositionBroadcaster } from "./position-broadcaster.js";
@@ -6,6 +6,7 @@ export { PositionBroadcaster } from "./position-broadcaster.js";
 export type { PositionCache } from "./cache/position-cache.js";
 export { InMemoryPositionCache } from "./cache/in-memory-position-cache.js";
 export { RedisPositionCache } from "./cache/redis-position-cache.js";
+export { UpstashPositionCache } from "./cache/upstash-position-cache.js";
 
 export { GeofenceStore } from "./geofence/geofence-store.js";
 export { GeofenceExitDetector } from "./geofence/geofence-detector.js";

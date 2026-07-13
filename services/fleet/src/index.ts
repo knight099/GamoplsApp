@@ -1,4 +1,11 @@
-export { buildApp } from "./build-app.js";
+export { buildApp, registerFleetRoutes } from "./build-app.js";
+export { subscribeAssetHealthChanged, type HealthSubscriptionDeps } from "./health-subscription.js";
+export {
+  MqttTelemetryPreviewPublisher,
+  type TelemetryPreviewPublisher,
+  type PreviewReading,
+  type MqttTelemetryPreviewPublisherOptions,
+} from "./telemetry-preview-publisher.js";
 export type { FleetRepository } from "./fleet-repository.js";
 export { InMemoryFleetRepository } from "./in-memory-fleet-repository.js";
 export { PrismaFleetRepository } from "./prisma-fleet-repository.js";

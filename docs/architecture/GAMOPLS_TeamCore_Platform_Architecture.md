@@ -92,15 +92,19 @@ All TypeScript. Part of the pnpm workspace. These are the load-bearing abstracti
 
 ### 4.2 Module services (`services/*`)
 
-Each service owns one domain concern, runs as a separate process, has its own database schema (where applicable), and communicates with other services **only** via NATS events for state changes. Direct HTTP calls are reserved for synchronous reads from the web dashboard.
+Each service owns one domain concern and communicates with other services **only** via NATS events for state changes; direct HTTP calls are reserved for synchronous reads from the web dashboard. Each has its own database schema (where applicable), its own route/build-app module, and its own test suite — that boundary is enforced regardless of how many OS processes it runs in.
 
-| Service | Language | Framework | Domain | Port |
+**V1 deployment note:** `map`, `chat`, `board`, `hub`, `fleet`, and `registry` are deployed as **one process**, `services/backend` (table below still shows their logical domains and dev-standalone ports; in practice they're all reached at `services/backend`'s single port under `/map`, `/chat`, `/board`, `/hub`, `/fleet`, `/registry`). This is an ops simplification for the V1 pilot scale, not a change to the module boundary: each service's route logic lives in its own package (`registerXRoutes(app, deps)` in `build-app.ts`), `services/backend` just imports and mounts it, and the event-bus-only rule between them still holds. Any module can be split back into its own process later with no code change — see "Splitting a module back out of `services/backend`" in §13.
+
+| Service | Language | Framework | Domain | V1 standalone dev port |
 |---|---|---|---|---|
 | `map` | TypeScript | Fastify | Geospatial: live positions, geofence CRUD, geofence-exit detection → `AlertRaised` | 4401 |
 | `chat` | TypeScript | Fastify | Messaging: mission channel CRUD, message CRUD, auto-posts system messages on `AlertRaised` | 4300 |
 | `board` | TypeScript | Fastify | Workflow: Mission/Task CRUD (asset-type-agnostic), task assignment to any `Taskable`, AI Agent plugin registration, `TaskSuggested` → draft task | 4302 |
 | `hub` | TypeScript | Fastify | Documents: upload/storage, metadata, keyword search (RAG stub interface for V2) | 4500 |
-| `registry` | TypeScript | Fastify | Plugin registry: self-registration endpoint, read API for known asset types/capabilities | 4600 |
+| `fleet` | TypeScript | Fastify | Fleet/driver/asset registry, driver-assignment history; the one module allowed to *call* `plugins/asset-vehicle` over HTTP (via `VehiclePluginClient`), never by importing it | 4600 |
+| `registry` | TypeScript | Fastify | Plugin registry: self-registration endpoint, read API for known asset types/capabilities | 4400 |
+| `backend` | TypeScript | Fastify | **V1's actual deployable**: mounts all of the above under path prefixes on one process | 4300 |
 | `core-ingestion` | Go | stdlib + MQTT/NATS clients | Telemetry bridge: MQTT subscriber → Edge Box payload normalisation → publishes `AssetLocationUpdated`/`AssetHealthChanged` to NATS | — |
 | `ai-engine` | Python | Pydantic + (optional) LangGraph | Health scoring: recomputes health score from telemetry, publishes `TaskSuggested` on threshold breach. LangGraph agent skeleton for future predictive maintenance. | — |
 
@@ -357,6 +361,16 @@ GamoplsApp/
 1. Create `packages/event-bus-kafka/` implementing `EventPublisher`/`EventSubscriber` from `@gamopls/event-schemas`.
 2. Change the composition root (`server.ts`) of each service to instantiate the new adapter instead of `NatsEventBus`.
 3. No other code changes. The port interfaces are the stability boundary.
+
+### Splitting a module back out of `services/backend` into its own process
+
+Because each module's routes are factored as `registerXRoutes(app, deps)` (called by both the module's own `buildApp()`/`server.ts` and by `services/backend`'s composition root), un-collapsing one is mechanical, not a rewrite:
+
+1. Remove that module's `registerXRoutes` call + prefix registration from `services/backend/src/server.ts`.
+2. Deploy that module's own (already-existing) `server.ts` as its own process again.
+3. Point `apps/web`'s `<MODULE>_SERVICE_URL` at the new standalone host:port instead of `services/backend`'s path prefix.
+
+No route, auth, or tenancy code changes — this is exactly why routes were kept in the owning service's package rather than written directly in `services/backend`.
 
 ---
 

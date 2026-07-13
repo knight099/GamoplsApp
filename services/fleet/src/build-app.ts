@@ -28,8 +28,13 @@ export interface BuildAppOptions {
   telemetryPreviewPublisher?: TelemetryPreviewPublisher;
 }
 
-export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
-  const app = Fastify({ logger: false });
+/**
+ * Registers the fleet routes directly onto an existing Fastify instance —
+ * the standalone-server path (`buildApp`) and the combined backend
+ * (`services/backend`) both call this, so route logic lives in one place
+ * regardless of how many processes are running.
+ */
+export function registerFleetRoutes(app: FastifyInstance, options: BuildAppOptions = {}): void {
   const fleetRepo = options.fleetRepo ?? new InMemoryFleetRepository();
   const driverRepo = options.driverRepo ?? new InMemoryDriverRepository();
   const assetRepo = options.assetRepo ?? new InMemoryAssetRepository();
@@ -249,6 +254,14 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     await telemetryPreviewPublisher.publish({ assetId: id, orgId: tenancy.org_id, fleetId: tenancy.fleet_id });
     return reply.status(202).send({ published: true });
   });
+}
 
+/**
+ * Builds (but does not start listening) a standalone Fastify app for
+ * services/fleet.
+ */
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const app = Fastify({ logger: false });
+  registerFleetRoutes(app, options);
   return app;
 }

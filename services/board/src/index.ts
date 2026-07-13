@@ -1,7 +1,8 @@
-export { buildApp } from "./build-app.js";
+export { buildApp, registerBoardRoutes } from "./build-app.js";
 export type { BuildAppOptions } from "./build-app.js";
 
 export { InMemoryBoardRepository } from "./in-memory-repository.js";
+export { PrismaBoardRepository } from "./prisma-repository.js";
 export type { BoardRepository } from "./repository.js";
 
 export {
